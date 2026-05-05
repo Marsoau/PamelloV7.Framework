@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PamelloV7.Framework", "PamelloV7.Framework\PamelloV7.Framework.csproj", "{ECAA0398-7482-4A3E-81D2-49B1662F8496}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PamelloV7.Framework.SampleApp", "PamelloV7.Framework.SampleApp\PamelloV7.Framework.SampleApp.csproj", "{D251BCA3-E609-4F2F-9862-7480D4A0568D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{ECAA0398-7482-4A3E-81D2-49B1662F8496}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECAA0398-7482-4A3E-81D2-49B1662F8496}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECAA0398-7482-4A3E-81D2-49B1662F8496}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D251BCA3-E609-4F2F-9862-7480D4A0568D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D251BCA3-E609-4F2F-9862-7480D4A0568D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D251BCA3-E609-4F2F-9862-7480D4A0568D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D251BCA3-E609-4F2F-9862-7480D4A0568D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
