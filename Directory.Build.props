@@ -1,0 +1,9 @@
+<Project>
+
+    <ItemGroup Condition="'$(MSBuildProjectName)' != 'PamelloV7.Framework.Shared.Generators'">
+        <ProjectReference Include="$(MSBuildThisFileDirectory)PamelloV7.Framework.Shared.Generators\PamelloV7.Framework.Shared.Generators.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+</Project>
