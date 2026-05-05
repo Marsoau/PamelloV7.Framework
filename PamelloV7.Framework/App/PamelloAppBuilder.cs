@@ -44,8 +44,8 @@ public class PamelloAppBuilder : IHostApplicationBuilder
     }
 
     public PamelloApp Build() => _builder switch {
-        WebApplicationBuilder webBuilder => new PamelloApp(webBuilder.Build()),
-        HostApplicationBuilder hostBuilder => new PamelloApp(hostBuilder.Build()),
+        WebApplicationBuilder webBuilder => new PamelloApp(webBuilder.Build(), Options),
+        HostApplicationBuilder hostBuilder => new PamelloApp(hostBuilder.Build(), Options),
         _ => throw new InvalidOperationException("Unknown builder type")
     };
 

@@ -1,16 +1,20 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using PamelloV7.Framework.Core.Logging;
 
 namespace PamelloV7.Framework.App;
 
 public class PamelloApp : IHost
 {
     private readonly IHost _host;
+    public readonly PamelloAppOptions Options;
     
     public IServiceProvider Services => _host.Services;
     
-    public PamelloApp(IHost host) {
+    public PamelloApp(IHost host, PamelloAppOptions options) {
         _host = host;
+        
+        Options = options;
     }
 
     public static PamelloAppBuilder CreateBuilder(string[] args, PamelloAppOptions? options = null) {
@@ -21,13 +25,15 @@ public class PamelloApp : IHost
     }
     
     public Task StartAsync(CancellationToken cancellationToken = default) {
-        Console.WriteLine("Pamello Start");
+        PamelloOutput.Logger = Options.Logger;
+        
+        PamelloOutput.Write("Start");
         
         return _host.StartAsync(cancellationToken);
     }
     
     public Task StopAsync(CancellationToken cancellationToken = default) {
-        Console.WriteLine("Pamello Stop");
+        PamelloOutput.Write("Pamello Stop");
         return _host.StopAsync(cancellationToken);
     }
     
