@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.Metrics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PamelloV7.Framework.Config.Loaders;
 
 namespace PamelloV7.Framework.App;
 
@@ -12,6 +13,8 @@ public class PamelloAppBuilder : IHostApplicationBuilder
     private readonly IHostApplicationBuilder _builder;
     
     public readonly PamelloAppOptions Options;
+    
+    public readonly PamelloConfigLoader ConfigLoader = new();
     
     public IDictionary<object, object> Properties => _builder.Properties;
     public IConfigurationManager Configuration => _builder.Configuration;
@@ -30,6 +33,8 @@ public class PamelloAppBuilder : IHostApplicationBuilder
 
     public void Configure() {
         Services.AddSingleton(Options);
+        
+        ConfigLoader.Load();
         
         if (_builder is WebApplicationBuilder webBuilder && Options.UseApi) {
             ConfigureForApi(webBuilder);

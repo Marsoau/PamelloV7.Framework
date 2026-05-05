@@ -12,10 +12,6 @@ class Program
             UseApi = true,
         }).Build();
         
-        await app.StartAsync();
-        
-        PamelloOutput.Write("Hello World!");
-
-        await app.WaitForShutdownAsync();
+        await app.RunAsync();
     }
 }
