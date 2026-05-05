@@ -7,7 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="../PamelloV7.Framework.Core/PamelloV7.Framework.Core.csproj" />
+        <PackageReference Include="Microsoft.AspNetCore.App" Version="10.0.7" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PamelloV7.Framework.Shared\PamelloV7.Framework.Shared.csproj" />
     </ItemGroup>
 
 </Project>

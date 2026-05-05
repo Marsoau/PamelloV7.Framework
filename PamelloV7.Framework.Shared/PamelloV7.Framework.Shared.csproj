@@ -6,8 +6,4 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="../PamelloV7.Framework.Core/PamelloV7.Framework.Core.csproj" />
-    </ItemGroup>
-
 </Project>
