@@ -13,5 +13,12 @@
     <ItemGroup>
       <ProjectReference Include="..\PamelloV7.Framework.Shared\PamelloV7.Framework.Shared.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+        <None Include="..\PamelloV7.Framework.Core.Generators\bin\$(Configuration)\netstandard2.0\PamelloV7.Framework.Core.Generators.dll"
+              Pack="true"
+              PackagePath="analyzers/dotnet/cs"
+              Visible="false" />
+    </ItemGroup>
 
 </Project>

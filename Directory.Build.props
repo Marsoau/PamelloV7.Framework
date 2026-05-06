@@ -1,4 +1,16 @@
 <Project>
+    <PropertyGroup Condition="
+        '$(MSBuildProjectName)' == 'PamelloV7.Framework'
+        OR '$(MSBuildProjectName)' == 'PamelloV7.Framework.Core'
+        OR '$(MSBuildProjectName)' == 'PamelloV7.Framework.Shared'">
+        <Authors>Marsoau</Authors>
+        <PackageProjectUrl>https://github.com/Marsoau/PamelloV7.Framework</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Marsoau/PamelloV7.Framework</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
 
     <ItemGroup Condition="
         '$(MSBuildProjectName)' != 'PamelloV7.Framework.Shared.Generators'
@@ -6,11 +18,15 @@
 
         <ProjectReference Include="$(MSBuildThisFileDirectory)PamelloV7.Framework.Shared.Generators\PamelloV7.Framework.Shared.Generators.csproj"
                           OutputItemType="Analyzer"
-                          ReferenceOutputAssembly="false" />
+                          ReferenceOutputAssembly="false"
+                          PrivateAssets="all"
+        />
 
         <ProjectReference Include="$(MSBuildThisFileDirectory)PamelloV7.Framework.Core.Generators\PamelloV7.Framework.Core.Generators.csproj"
                           OutputItemType="Analyzer"
-                          ReferenceOutputAssembly="false" />
+                          ReferenceOutputAssembly="false"
+                          PrivateAssets="all"
+        />
 
     </ItemGroup>
 
