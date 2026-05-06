@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using PamelloV7.Framework.Config.Parts;
+using PamelloV7.Framework.Core.Config;
 using PamelloV7.Framework.Core.Config.Loaders;
 using PamelloV7.Framework.Core.Config.Parts;
 
@@ -53,7 +54,7 @@ public class PamelloConfigLoader : IPamelloConfigLoader
             Parts.Add(part);
         }
         
-        //part.Initialize(typeof(ServerNode), typeof(ServerConfig), null);
+        part.Initialize(typeof(ServerNode), typeof(ServerConfig), null);
         part.Finish();
     }
     

@@ -35,6 +35,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         Services.AddSingleton(Options);
         
         ConfigLoader.Load();
+        ConfigLoader.FinishForServer();
         
         if (_builder is WebApplicationBuilder webBuilder && Options.UseApi) {
             ConfigureForApi(webBuilder);

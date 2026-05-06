@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PamelloV7.Framework.App;
+using PamelloV7.Framework.Core.Config;
 using PamelloV7.Framework.Core.Logging;
 
 namespace PamelloV7.Framework.SampleApp;
@@ -12,6 +13,14 @@ class Program
             UseApi = true,
         }).Build();
         
-        await app.RunAsync();
+        await app.StartAsync();
+        
+        await Test();
+
+        await app.WaitForShutdownAsync();
+    }
+
+    static async Task Test() {
+        PamelloOutput.Write(ServerConfig.Root.AllowUserCreation);
     }
 }

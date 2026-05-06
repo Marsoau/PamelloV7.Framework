@@ -1,7 +1,7 @@
-using PamelloV7.Framework.Config.Attributes;
+using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Config.Loaders;
 
-namespace PamelloV7.Framework.Config;
+namespace PamelloV7.Framework.Core.Config;
 
 [ConfigRoot]
 public partial class ServerNode

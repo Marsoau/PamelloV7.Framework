@@ -1,4 +1,4 @@
-namespace PamelloV7.Framework.Config.Attributes;
+namespace PamelloV7.Framework.Core.Config.Attributes;
 
 public class ConfigRootAttribute : Attribute
 {

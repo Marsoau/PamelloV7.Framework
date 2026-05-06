@@ -6,4 +6,11 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+        <None Include="..\PamelloV7.Framework.Shared.Generators\bin\$(Configuration)\netstandard2.0\PamelloV7.Framework.Shared.Generators.dll"
+              Pack="true"
+              PackagePath="analyzers/dotnet/cs"
+              Visible="false" />
+    </ItemGroup>
+
 </Project>

@@ -33,7 +33,7 @@ public class PamelloApp : IHost
     }
     
     public Task StopAsync(CancellationToken cancellationToken = default) {
-        PamelloOutput.Write("Pamello Stop");
+        PamelloOutput.Write("Stop");
         return _host.StopAsync(cancellationToken);
     }
     
