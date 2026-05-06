@@ -26,23 +26,23 @@ public static class SharedHelper
         return $"namespace {classNamespace};";
     }
 
-    public static IEnumerable<string> GetContainingTypes(ITypeSymbol classSymbol) {
+    public static IEnumerable<ITypeSymbol> GetContainingTypes(ITypeSymbol classSymbol) {
         while (true) {
             var containingType = classSymbol.ContainingType;
             if (containingType is null) yield break;
             
-            yield return containingType.Name;
+            yield return containingType;
 
             classSymbol = containingType;
         }
     }
 
-    public static void WriteInsideClasses(string[] classNames, string inheritancePart, string innerPart, StringBuilder sb, int depth = 0) {
-        if (classNames.Length == 0) return;
+    public static void WriteInsideClasses(ITypeSymbol[] classTypes, string inheritancePart, string innerPart, StringBuilder sb, int depth = 0) {
+        if (classTypes.Length == 0) return;
         
-        sb.Append($"{Tab(depth)}public partial class {classNames[depth]} ");
+        sb.Append($"{Tab(depth)}{GetTypeModifiers(classTypes[depth])} class {classTypes[depth].Name} ");
         
-        if (depth + 1 >= classNames.Length) {
+        if (depth + 1 >= classTypes.Length) {
             sb.AppendLine($"{inheritancePart}{(
                 inheritancePart.LastOrDefault() == ' ' ? "{" : " {"
             )}");
@@ -55,7 +55,7 @@ public static class SharedHelper
         }
 
         sb.AppendLine($"{{");
-        WriteInsideClasses(classNames, inheritancePart, innerPart, sb, depth + 1);
+        WriteInsideClasses(classTypes, inheritancePart, innerPart, sb, depth + 1);
         sb.AppendLine($"{Tab(depth)}}}");
     }
     
@@ -63,7 +63,7 @@ public static class SharedHelper
         var sb = new StringBuilder();
         
         var containingTypes = GetContainingTypes(type).ToArray();
-        WriteInsideClasses([..containingTypes, type.Name], inheritancePart, innerPart, sb);
+        WriteInsideClasses([..containingTypes, type], inheritancePart, innerPart, sb);
         
         return sb;
     }
@@ -146,6 +146,30 @@ public static class SharedHelper
             modifiers.Add("override");
         if (methodSymbol.IsExtern)
             modifiers.Add("extern");
+
+        return string.Join(" ", modifiers);
+    }
+    
+    // New helper — mirrors GetMethodModifiers but for types
+    public static string GetTypeModifiers(ITypeSymbol typeSymbol) {
+        var modifiers = new List<string>();
+
+        var accessibility = typeSymbol.DeclaredAccessibility switch {
+            Accessibility.Public             => "public",
+            Accessibility.Internal           => "internal",
+            Accessibility.Protected          => "protected",
+            Accessibility.ProtectedAndInternal  => "private protected",
+            Accessibility.ProtectedOrInternal   => "protected internal",
+            Accessibility.Private            => "private",
+            _                                => ""
+        };
+
+        if (!string.IsNullOrEmpty(accessibility))
+            modifiers.Add(accessibility);
+        if (typeSymbol.IsStatic)
+            modifiers.Add("static");
+
+        modifiers.Add("partial"); // always partial — we're generating into it
 
         return string.Join(" ", modifiers);
     }

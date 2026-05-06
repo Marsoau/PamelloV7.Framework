@@ -7,12 +7,12 @@ using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.SampleApp;
 
-partial class TC
+static partial class TC
 {
     private static int NumberFromString(string str) => int.Parse(str);
     private static int NumberFromDateTime(DateTime date) => date.DayOfYear;
     
-    public void Method(
+    public static void Method(
         [Variant(nameof(NumberFromString))]
         [Variant(nameof(NumberFromDateTime))]
         int number
@@ -38,10 +38,8 @@ class Program
     static async Task Test() {
         PamelloOutput.Write(ServerConfig.Root.AllowUserCreation);
         
-        var tc = new TC();
-        
-        tc.Method(3);
-        tc.Method("123");
-        tc.Method(DateTime.Now);
+        TC.Method(3);
+        TC.Method("123");
+        TC.Method(DateTime.Now);
     }
 }
