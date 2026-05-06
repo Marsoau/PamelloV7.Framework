@@ -1,9 +1,12 @@
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using PamelloV7.Framework.Config.Parts;
 using PamelloV7.Framework.Core.Config;
+using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Config.Loaders;
 using PamelloV7.Framework.Core.Config.Parts;
+using PamelloV7.Framework.Core.Logging;
 
 namespace PamelloV7.Framework.Config.Loaders;
 
@@ -47,15 +50,38 @@ public class PamelloConfigLoader : IPamelloConfigLoader
         }
     }
 
-    public void FinishForServer() {
-        var part = Parts.FirstOrDefault(x => x.Name == "Server");
-        if (part is null) {
-            part = new PamelloConfigPart("Server", new JsonObject(), true);
-            Parts.Add(part);
-        }
+    public void FinishBeforeModules() {
+        var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes()).ToList();
+        var rootNodes = types.Where(t =>
+            t is { IsClass: true, IsAbstract: false } &&
+            t.GetCustomAttribute<ConfigRootAttribute>() is not null
+        );
         
-        part.Initialize(typeof(ServerNode), typeof(ServerConfig), null);
-        part.Finish();
+        var configTypes = new Dictionary<string, KeyValuePair<Type, Type>>();
+        
+        foreach (var rootNode in rootNodes) {
+            var attribute = rootNode.GetCustomAttribute<ConfigRootAttribute>()!;
+            
+            var staticType = types.FirstOrDefault(t => t.Name == rootNode.Name.Replace("Node", "Config"));
+            var nodeType = types.FirstOrDefault(t => t.Name == rootNode.Name);
+        
+            if (staticType is null || nodeType is null) return;
+            
+            attribute.Name ??= rootNode.Name.Replace("Node", "");
+        
+            configTypes.Add(attribute.Name.Split(":").LastOrDefault() ?? "", new KeyValuePair<Type, Type>(staticType, nodeType));
+        }
+
+        foreach (var (partName, (staticType, nodeType)) in configTypes) {
+            var part = Parts.FirstOrDefault(x => x.Name == partName);
+            if (part is null) {
+                part = new PamelloConfigPart(partName, new JsonObject(), true);
+                Parts.Add(part);
+            }
+        
+            part.Initialize(nodeType, staticType, null);
+            part.Finish();
+        }
     }
     
     /*

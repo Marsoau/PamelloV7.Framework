@@ -25,15 +25,10 @@ public class PamelloApp : IHost
     }
     
     public Task StartAsync(CancellationToken cancellationToken = default) {
-        PamelloOutput.Logger = Options.Logger;
-        
-        PamelloOutput.Write("Start");
-        
         return _host.StartAsync(cancellationToken);
     }
     
     public Task StopAsync(CancellationToken cancellationToken = default) {
-        PamelloOutput.Write("Stop");
         return _host.StopAsync(cancellationToken);
     }
     
