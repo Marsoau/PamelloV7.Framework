@@ -1,7 +1,7 @@
 using System.Text;
 using Microsoft.CodeAnalysis;
 
-namespace PamelloV7.Framework.Shared.Generators.Config;
+namespace PamelloV7.Framework.Core.Generators.Config;
 
 public record ConfigRootPartDescriptor(
     ITypeSymbol RootNodeClass,

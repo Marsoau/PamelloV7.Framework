@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <IsRoslynComponent>true</IsRoslynComponent>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <!-- in Core.Generators.csproj -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.3.0" PrivateAssets="all" />
+        <Compile Include="..\PamelloV7.Framework.Shared.Generators\Helpers\SharedHelper.cs"
+                 Link="Helpers/SharedHelper.cs" />
+        <Compile Include="..\PamelloV7.Framework.Shared.Generators\Helpers\TypeSymbolExtensions.cs"
+                 Link="Helpers/TypeSymbolExtensions.cs" />
+    </ItemGroup>
+</Project>

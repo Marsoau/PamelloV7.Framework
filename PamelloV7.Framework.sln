@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PamelloV7.Framework.Shared"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PamelloV7.Framework.Shared.Generators", "PamelloV7.Framework.Shared.Generators\PamelloV7.Framework.Shared.Generators.csproj", "{EDA67A89-48C5-4BEC-AAE9-CE05E1807D02}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PamelloV7.Framework.Core.Generators", "PamelloV7.Framework.Core.Generators\PamelloV7.Framework.Core.Generators.csproj", "{0501DC75-1BF9-4DD9-8722-6987124FCBA3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{EDA67A89-48C5-4BEC-AAE9-CE05E1807D02}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDA67A89-48C5-4BEC-AAE9-CE05E1807D02}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDA67A89-48C5-4BEC-AAE9-CE05E1807D02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0501DC75-1BF9-4DD9-8722-6987124FCBA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0501DC75-1BF9-4DD9-8722-6987124FCBA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0501DC75-1BF9-4DD9-8722-6987124FCBA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0501DC75-1BF9-4DD9-8722-6987124FCBA3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

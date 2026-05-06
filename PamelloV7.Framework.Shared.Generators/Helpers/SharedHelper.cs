@@ -3,9 +3,9 @@ using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 
-namespace PamelloV7.Framework.Shared.Generators;
+namespace PamelloV7.Framework.Shared.Generators.Helpers;
 
-public static class GeneratorBase
+public static class SharedHelper
 {
     public static string Tab(int count) => string.Join("", Enumerable.Repeat("    ", count));
     
