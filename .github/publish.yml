@@ -1,0 +1,41 @@
+name: Publish NuGet packages
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  publish:
+    name: Pack and push to NuGet.org
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore PamelloV7.Framework.sln
+
+      - name: Build
+        run: dotnet build PamelloV7.Framework.sln --configuration Release --no-restore /p:Version=${{ github.ref_name }}
+
+      - name: Pack PamelloV7.Framework.Shared
+        run: dotnet pack PamelloV7.Framework.Shared/PamelloV7.Framework.Shared.csproj --configuration Release --no-build /p:Version=${{ github.ref_name }} --output nupkgs
+
+      - name: Pack PamelloV7.Framework.Core
+        run: dotnet pack PamelloV7.Framework.Core/PamelloV7.Framework.Core.csproj --configuration Release --no-build /p:Version=${{ github.ref_name }} --output nupkgs
+
+      - name: Pack PamelloV7.Framework
+        run: dotnet pack PamelloV7.Framework/PamelloV7.Framework.csproj --configuration Release --no-build /p:Version=${{ github.ref_name }} --output nupkgs
+
+      #- name: Pack PamelloV7.Wrapper.Base
+      #  run: dotnet pack PamelloV7.Wrapper.Base/PamelloV7.Wrapper.Base.csproj --configuration Release --no-build /p:Version=${{ github.ref_name }} --output nupkgs
+
+      - name: Push to NuGet.org
+        run: dotnet nuget push "nupkgs/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
