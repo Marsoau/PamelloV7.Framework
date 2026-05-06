@@ -4,6 +4,6 @@ using Microsoft.CodeAnalysis;
 namespace PamelloV7.Framework.Shared.Generators.Config;
 
 public record ConfigRootPartDescriptor(
-    ITypeSymbol ClassType,
+    ITypeSymbol RootNodeClass,
     StringBuilder DebugOutput
 );

@@ -15,6 +15,17 @@ public static class GeneratorBase
             : classSymbol.ContainingNamespace.ToDisplayString();
     }
 
+    public static string GetNamespaceDeclaration(ITypeSymbol classSymbol, string? innerText = null) {
+        var classNamespace = classSymbol.ContainingNamespace.IsGlobalNamespace 
+            ? string.Empty 
+            : classSymbol.ContainingNamespace.ToDisplayString();
+        
+        if (string.IsNullOrEmpty(classNamespace)) return "";
+        if (innerText is not null) return $"namespace {classNamespace} {{\n\t{innerText}\n}}";
+        
+        return $"namespace {classNamespace};";
+    }
+
     public static IEnumerable<string> GetContainingTypes(ITypeSymbol classSymbol) {
         while (true) {
             var containingType = classSymbol.ContainingType;
@@ -188,7 +199,7 @@ public static class GeneratorBase
     {
         if (typeSymbol is INamedTypeSymbol namedType && namedType.IsGenericType)
         {
-            string ns = namedType.ContainingNamespace?.ToDisplayString();
+            string ns = namedType.ContainingNamespace?.ToDisplayString() ?? "";
             string name = namedType.MetadataName; // MetadataName includes the tick, e.g. "Task`1"
 
             if (ns == "System.Threading.Tasks" && (name == "Task`1" || name == "ValueTask`1"))

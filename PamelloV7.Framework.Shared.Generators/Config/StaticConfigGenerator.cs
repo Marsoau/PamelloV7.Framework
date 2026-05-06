@@ -23,23 +23,19 @@ public class StaticConfigGenerator : IIncrementalGenerator
     }
 
     private static ConfigRootPartDescriptor? GetDescriptor(GeneratorSyntaxContext context, CancellationToken cancellationToken) {
-        if (context.SemanticModel.GetDeclaredSymbol(context.Node, cancellationToken) is not INamedTypeSymbol classType) {
+        if (context.SemanticModel.GetDeclaredSymbol(context.Node, cancellationToken) is not INamedTypeSymbol rootNodeClass) {
             return null;
         }
-        if (classType.GetAttributes().FirstOrDefault(a => a.AttributeClass?.Name == "ConfigRootAttribute") is not { } attribute) {
+        if (rootNodeClass.GetAttributes().FirstOrDefault(a => a.AttributeClass?.Name == "ConfigRootAttribute") is not { } attribute) {
             return null;
         }
-        
-        var namespaceName = classType.ContainingNamespace.IsGlobalNamespace 
-            ? string.Empty 
-            : classType.ContainingNamespace.ToDisplayString();
         
         var debug = new StringBuilder();
         
-        debug.AppendLine($"Found {classType.Name}");
+        debug.AppendLine($"Found {rootNodeClass.Name}");
         
         return new ConfigRootPartDescriptor(
-            classType,
+            rootNodeClass,
             debug
         );
     }
@@ -71,10 +67,6 @@ public class StaticConfigGenerator : IIncrementalGenerator
     }
         
     private static void Generate(SourceProductionContext context, ConfigRootPartDescriptor descriptor) {
-        var classNamespace = descriptor.ClassType.ContainingNamespace.IsGlobalNamespace 
-            ? string.Empty 
-            : descriptor.ClassType.ContainingNamespace.ToDisplayString();
-
         var source =
             $$"""
             /* debug output
@@ -83,19 +75,19 @@ public class StaticConfigGenerator : IIncrementalGenerator
             
             using PamelloV7.Framework.Core.Config.Parts;
             
-            namespace {{classNamespace}};
+            {{GeneratorBase.GetNamespaceDeclaration(descriptor.RootNodeClass)}}
             
             //static config part
-            public static partial class {{AdjustedName(descriptor.ClassType.Name, "Node")}}Config {
-                public static {{descriptor.ClassType.GetFullName()}} Root;
+            public static partial class {{AdjustedName(descriptor.RootNodeClass.Name, "Node")}}Config {
+                public static {{descriptor.RootNodeClass.GetFullName()}} Root;
                 public static IPamelloConfigPart Part;
             }
             
             //root node
-            {{GenerateNode(descriptor.ClassType, 0)}}
+            {{GenerateNode(descriptor.RootNodeClass, 0)}}
             
             """;
         
-        context.AddSource($"{AdjustedName(descriptor.ClassType.Name, "Node")}Config.g.cs", SourceText.From(source, Encoding.UTF8));
+        context.AddSource($"{AdjustedName(descriptor.RootNodeClass.Name, "Node")}Config.g.cs", SourceText.From(source, Encoding.UTF8));
     }
 }
