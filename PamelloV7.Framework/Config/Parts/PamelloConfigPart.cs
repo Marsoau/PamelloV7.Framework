@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using PamelloV7.Framework.Core.Config.Parts;
-using PamelloV7.Framework.Core.Modules.Base;
+using PamelloV7.Framework.Core.Modules;
 using PamelloV7.Framework.Shared.Exceptions;
 
 namespace PamelloV7.Framework.Config.Parts;
@@ -19,7 +19,7 @@ public class PamelloConfigPart : IPamelloConfigPart
     public Type NodeType => _nodeType ?? throw new Exception("Node type not initialized");
     public Type StaticType => _staticType ?? throw new Exception("Static type not initialized");
     public object? Node { get; private set; } = null;
-    public IPamelloModule? Module { get; private set; }
+    public PamelloModule? Module { get; private set; }
     
     public List<IPamelloConfigPreInitializer> PreInitializers { get; private set; } = [];
     
@@ -33,7 +33,7 @@ public class PamelloConfigPart : IPamelloConfigPart
         IsJustCreated = isJustCreated;
     }
     
-    public void Initialize(Type nodeType, Type staticType, IPamelloModule? module) {
+    public void Initialize(Type nodeType, Type staticType, PamelloModule? module) {
         _nodeType = nodeType;
         _staticType = staticType;
         

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using PamelloV7.Framework.Config.Loaders;
 using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Logging;
+using PamelloV7.Framework.Core.Modules.Loaders;
 
 namespace PamelloV7.Framework.App;
 
@@ -19,6 +20,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
     public readonly PamelloAppOptions Options;
     
     public readonly PamelloConfigLoader ConfigLoader;
+    public readonly IPamelloModuleLoader ModuleLoader;
     
     public IDictionary<object, object> Properties => _builder.Properties;
     public IConfigurationManager Configuration => _builder.Configuration;
@@ -31,6 +33,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         Options = options ?? new PamelloAppOptions();
         
         ConfigLoader = new PamelloConfigLoader(Options);
+        ModuleLoader = null!;
 
         _builder = Options.UseApi
             ? WebApplication.CreateBuilder(args)
@@ -49,6 +52,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         
         editOptionsAfterConfig?.Invoke(Options);
         
+        Options.Logger?.Modules = ModuleLoader;
         PamelloOutput.Logger = Options.Logger;
 
         if (_builder is WebApplicationBuilder webBuilder && Options.UseApi) {

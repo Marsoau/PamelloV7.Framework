@@ -1,5 +1,5 @@
 using System.Text.Json.Nodes;
-using PamelloV7.Framework.Core.Modules.Base;
+using PamelloV7.Framework.Core.Modules;
 
 namespace PamelloV7.Framework.Core.Config.Parts;
 
@@ -10,14 +10,14 @@ public interface IPamelloConfigPart
     public Type NodeType { get; }
     public Type StaticType { get; }
     public object? Node { get; }
-    public IPamelloModule? Module { get; }
+    public PamelloModule? Module { get; }
     
     public List<IPamelloConfigPreInitializer> PreInitializers { get; }
     
     public bool IsJustCreated { get; }
     public bool IsInitialized { get; }
 
-    public void Initialize(Type nodeType, Type staticType, IPamelloModule? module);
+    public void Initialize(Type nodeType, Type staticType, PamelloModule? module);
 
     public IEnumerable<IPamelloConfigPreInitializer> GetPreInitializers(Type nodeType, string? previousPath = null);
 
