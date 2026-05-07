@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using PamelloV7.Framework.App;
 using PamelloV7.Framework.Core.Config;
 using PamelloV7.Framework.Core.Config.Attributes;
+using PamelloV7.Framework.Core.Data;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.SampleApp.Services;
 using PamelloV7.Framework.Shared.Variants.Attributes;
@@ -17,6 +18,12 @@ public class TestNode
     public ushort Port { get; set; } = 51630;
 }
 
+public class DatabaseItem
+{
+    public int Id { get; set; }
+    public string Message { get; set; } = "";
+}
+
 class Program
 {
     static async Task Main(string[] args) {
@@ -26,9 +33,12 @@ class Program
         
         await app.StartAsync();
         
-        var sample = app.Services.GetRequiredService<ISampleService>();
+        var database = app.Services.GetRequiredService<IDatabaseAccessService>();
+        var collection = database.GetCollection<DatabaseItem>("test");
 
-        Console.WriteLine(sample.GetMessage());
+        foreach (var item in collection.GetAll()) {
+            Console.WriteLine(item.Message);
+        }
 
         await app.WaitForShutdownAsync();
     }

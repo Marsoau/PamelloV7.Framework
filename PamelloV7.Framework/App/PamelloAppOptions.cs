@@ -26,6 +26,20 @@ public record PamelloAppOptions()
         AppContext.BaseDirectory,
         "Config"
     );
+
+    public string DataPath =>
+    #if DEBUG
+        DebugDataPath;
+    #else
+        ReleaseDataPath;
+    #endif
+
+    public string ConfigPath =>
+    #if DEBUG
+        DebugConfigPath;
+    #else
+        ReleaseConfigPath;
+    #endif
     
     public bool UseApi { get; init; } = true;
     public List<string> ApiUrls { get; init; } = [];

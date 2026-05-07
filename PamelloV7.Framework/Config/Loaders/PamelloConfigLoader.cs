@@ -33,11 +33,7 @@ public class PamelloConfigLoader : IPamelloConfigLoader
     }
 
     public void Load() {
-        #if DEBUG
-        var configFile = new FileInfo(Path.Combine(_options.DebugConfigPath, "config.jsonc"));
-        #elif RELEASE
-        var configFile = new FileInfo(Path.Combine(_options.ReleaseConfigPath, "config.jsonc"));
-        #endif
+        var configFile = new FileInfo(Path.Combine(_options.ConfigPath, "config.jsonc"));
         
         if (!(configFile.Directory?.Exists ?? true)) configFile.Directory.Create();
 
