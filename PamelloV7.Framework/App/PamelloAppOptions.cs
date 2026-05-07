@@ -27,20 +27,26 @@ public record PamelloAppOptions()
         "Config"
     );
 
-    public string DataPath =>
-    #if DEBUG
-        DebugDataPath;
-    #else
-        ReleaseDataPath;
-    #endif
-
-    public string ConfigPath =>
-    #if DEBUG
-        DebugConfigPath;
-    #else
-        ReleaseConfigPath;
-    #endif
-    
     public bool UseApi { get; init; } = true;
     public List<string> ApiUrls { get; init; } = [];
+}
+
+public static class PamelloAppOptionsExtensions
+{
+    extension(PamelloAppOptions options)
+    {
+        public string DataPath =>
+        #if DEBUG
+            options.DebugDataPath;
+        #else
+            ReleaseDataPath;
+        #endif
+
+        public string ConfigPath =>
+        #if DEBUG
+            options.DebugConfigPath;
+        #else
+            ReleaseConfigPath;
+        #endif
+    }
 }
