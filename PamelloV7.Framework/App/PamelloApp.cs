@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PamelloV7.Framework.Core.Logging;
@@ -25,7 +26,16 @@ public class PamelloApp : IHost
     }
     
     public Task StartAsync(CancellationToken cancellationToken = default) {
+        if (_host is WebApplication asp && Options.UseApi) {
+            StartupForApi(asp);
+        }
+        
         return _host.StartAsync(cancellationToken);
+    }
+    
+    private static void StartupForApi(WebApplication asp) {
+        //asp.MapHub<SignalHub>("/Signal");
+        asp.MapControllers();
     }
     
     public Task StopAsync(CancellationToken cancellationToken = default) {

@@ -17,7 +17,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
     
     public readonly PamelloAppOptions Options;
     
-    public readonly PamelloConfigLoader ConfigLoader = new();
+    public readonly PamelloConfigLoader ConfigLoader;
     
     public IDictionary<object, object> Properties => _builder.Properties;
     public IConfigurationManager Configuration => _builder.Configuration;
@@ -28,6 +28,8 @@ public class PamelloAppBuilder : IHostApplicationBuilder
 
     public PamelloAppBuilder(string[] args, PamelloAppOptions? options = null) {
         Options = options ?? new PamelloAppOptions();
+        
+        ConfigLoader = new PamelloConfigLoader(Options);
 
         _builder = Options.UseApi
             ? WebApplication.CreateBuilder(args)
@@ -36,6 +38,8 @@ public class PamelloAppBuilder : IHostApplicationBuilder
 
     public void Configure() {
         Services.AddSingleton(Options);
+        
+        Services.AddSingleton(ConfigLoader);
         
         PamelloOutput.Logger = Options.Logger;
         
@@ -47,6 +51,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         }
         
         Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Error);
+        Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Error);
     }
 
     private static void ConfigureForApi(WebApplicationBuilder webBuilder) {

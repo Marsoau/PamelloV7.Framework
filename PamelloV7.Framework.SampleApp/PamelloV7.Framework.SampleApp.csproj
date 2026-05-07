@@ -11,4 +11,10 @@
       <ProjectReference Include="..\PamelloV7.Framework\PamelloV7.Framework.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Config\config.jsonc">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

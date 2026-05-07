@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using PamelloV7.Framework.App;
 using PamelloV7.Framework.Config.Parts;
 using PamelloV7.Framework.Core.Config;
 using PamelloV7.Framework.Core.Config.Attributes;
@@ -12,14 +13,18 @@ namespace PamelloV7.Framework.Config.Loaders;
 
 public class PamelloConfigLoader : IPamelloConfigLoader
 {
-    public JsonObject? _json;
+    private readonly PamelloAppOptions _options;
+    
+    private JsonObject? _json;
     public JsonObject Json => _json ?? throw new InvalidOperationException("Json not set");
     
     public List<IPamelloConfigPart> Parts { get; private set; }
 
     private readonly JsonSerializerOptions _jsoncProperties;
 
-    public PamelloConfigLoader() {
+    public PamelloConfigLoader(PamelloAppOptions options) {
+        _options = options;
+        
         Parts = [];
         
         _jsoncProperties = new JsonSerializerOptions {
@@ -29,19 +34,24 @@ public class PamelloConfigLoader : IPamelloConfigLoader
 
     public void Load() {
         #if DEBUG
-        var configFile = new FileInfo(Path.Combine(Path.Combine(AppContext.BaseDirectory, "Config", "config.jsonc")));
+        var configFile = new FileInfo(Path.Combine(_options.DebugConfigPath, "config.jsonc"));
         #elif RELEASE
-        var configFile = new FileInfo(IPamelloConfigLoader.DefaultConfigFilePath);
+        var configFile = new FileInfo(Path.Combine(_options.ReleaseConfigPath, "config.jsonc"));
         #endif
         
         if (!(configFile.Directory?.Exists ?? true)) configFile.Directory.Create();
 
-        if (!configFile.Exists || configFile.Length == 0) {
+        if (!configFile.Exists) {
+            configFile.Create().Close();
+        }
+
+        try {
+            using var fs = configFile.OpenRead();
+            _json = JsonSerializer.Deserialize<JsonObject>(fs, _jsoncProperties);
+        }
+        catch {
             _json = new JsonObject();
         }
-        else using (var fs = configFile.OpenRead()) {
-            _json = JsonSerializer.Deserialize<JsonObject>(fs, _jsoncProperties);
-        };
 
         foreach (var (partName, partJson) in Json) {
             if (partJson is null) continue;
