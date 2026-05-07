@@ -10,6 +10,7 @@ using PamelloV7.Framework.Config.Loaders;
 using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.Modules.Loaders;
+using PamelloV7.Framework.Services.Loaders;
 
 namespace PamelloV7.Framework.App;
 
@@ -20,6 +21,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
     public readonly PamelloAppOptions Options;
     
     public readonly PamelloConfigLoader ConfigLoader;
+    public readonly PamelloServiceLoader ServiceLoader;
     public readonly IPamelloModuleLoader ModuleLoader;
     
     public IDictionary<object, object> Properties => _builder.Properties;
@@ -33,6 +35,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         Options = options ?? new PamelloAppOptions();
         
         ConfigLoader = new PamelloConfigLoader(Options);
+        ServiceLoader = new PamelloServiceLoader(Options);
         ModuleLoader = null!;
 
         _builder = Options.UseApi
@@ -40,12 +43,20 @@ public class PamelloAppBuilder : IHostApplicationBuilder
             : Host.CreateApplicationBuilder(args);
     }
 
+    class SomeAAndBClass : InterfaceA, InterfaceB;
+    interface InterfaceA;
+    interface InterfaceB;
+
     public void Configure(Action<PamelloAppOptions>? editOptionsAfterConfig = null) {
         Services.AddSingleton(Options);
         
         Services.AddSingleton(ConfigLoader);
+        Services.AddSingleton(ServiceLoader);
 
         Services.AddSingleton(Services);
+        
+        Services.AddSingleton<InterfaceA, SomeAAndBClass>();
+        Services.AddSingleton<InterfaceB, SomeAAndBClass>();
         
         ConfigLoader.Load();
         ConfigLoader.FinishBeforeModules();
@@ -54,6 +65,9 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         
         Options.Logger?.Modules = ModuleLoader;
         PamelloOutput.Logger = Options.Logger;
+        
+        ServiceLoader.LoadAppServices();
+        ServiceLoader.ConfigureAppServices(Services);
 
         if (_builder is WebApplicationBuilder webBuilder && Options.UseApi) {
             ConfigureForApi(webBuilder);

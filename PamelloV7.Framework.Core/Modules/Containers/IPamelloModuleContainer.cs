@@ -4,10 +4,10 @@ namespace PamelloV7.Framework.Core.Modules.Containers;
 
 public interface IPamelloModuleContainer
 {
-    public Assembly Assembly { get; }
+    public Assembly[] Assemblies { get; }
+    public Assembly ModuleAssembly { get; }
     public PamelloModule Module { get; }
     public Dictionary<Type, Type?> Services { get; }
-    public List<string> Dependencies { get; }
     public Dictionary<string, KeyValuePair<Type, Type>> ConfigTypes { get; }
 }
 

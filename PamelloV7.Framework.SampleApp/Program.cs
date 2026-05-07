@@ -5,6 +5,7 @@ using PamelloV7.Framework.App;
 using PamelloV7.Framework.Core.Config;
 using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Logging;
+using PamelloV7.Framework.SampleApp.Services;
 using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.SampleApp;
@@ -24,8 +25,10 @@ class Program
         }).Build();
         
         await app.StartAsync();
+        
+        var sample = app.Services.GetRequiredService<ISampleService>();
 
-        Console.WriteLine(TestConfig.Root.MyConfigValue);
+        Console.WriteLine(sample.GetMessage());
 
         await app.WaitForShutdownAsync();
     }
