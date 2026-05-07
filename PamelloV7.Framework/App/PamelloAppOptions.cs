@@ -5,7 +5,7 @@ namespace PamelloV7.Framework.App;
 
 public record PamelloAppOptions()
 {
-    public IPamelloLogger? Logger { get; init; } = new PamelloConsoleLogger();
+    public PamelloLogger? Logger { get; init; } = new PamelloConsoleLogger();
     
     public string ReleaseDataPath { get; init; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
