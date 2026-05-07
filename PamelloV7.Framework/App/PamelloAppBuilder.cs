@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.Metrics;
@@ -36,15 +37,19 @@ public class PamelloAppBuilder : IHostApplicationBuilder
             : Host.CreateApplicationBuilder(args);
     }
 
-    public void Configure() {
+    public void Configure(Action<PamelloAppOptions>? editOptionsAfterConfig = null) {
         Services.AddSingleton(Options);
         
         Services.AddSingleton(ConfigLoader);
-        
-        PamelloOutput.Logger = Options.Logger;
+
+        Services.AddSingleton(Services);
         
         ConfigLoader.Load();
         ConfigLoader.FinishBeforeModules();
+        
+        editOptionsAfterConfig?.Invoke(Options);
+        
+        PamelloOutput.Logger = Options.Logger;
 
         if (_builder is WebApplicationBuilder webBuilder && Options.UseApi) {
             ConfigureForApi(webBuilder);
@@ -54,9 +59,12 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Error);
     }
 
-    private static void ConfigureForApi(WebApplicationBuilder webBuilder) {
+    private void ConfigureForApi(WebApplicationBuilder webBuilder) {
         webBuilder.Services.AddControllers();
         webBuilder.Services.AddSignalR();
+
+        if (Options.ApiUrls.Count > 0)
+            webBuilder.WebHost.UseUrls([..Options.ApiUrls]);
     }
 
     public PamelloApp Build() => _builder switch {

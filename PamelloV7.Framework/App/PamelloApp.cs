@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PamelloV7.Framework.Core.Logging;
+using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.App;
 
-public class PamelloApp : IHost
+public partial class PamelloApp : IHost
 {
     private readonly IHost _host;
     public readonly PamelloAppOptions Options;
@@ -17,10 +20,17 @@ public class PamelloApp : IHost
         
         Options = options;
     }
+    
+    private static PamelloAppOptions GetDefaultOptions() => new();
 
-    public static PamelloAppBuilder CreateBuilder(string[] args, PamelloAppOptions? options = null) {
+    public static PamelloAppBuilder CreateBuilder(
+        string[] args,
+        [Variant(nameof(GetDefaultOptions))]
+        PamelloAppOptions? options,
+        Action<PamelloAppOptions>? editOptionsAfterConfig = null
+    ) {
         var builder = new PamelloAppBuilder(args, options);
-        builder.Configure();
+        builder.Configure(editOptionsAfterConfig);
 
         return builder;
     }
@@ -35,6 +45,15 @@ public class PamelloApp : IHost
     
     private static void StartupForApi(WebApplication asp) {
         //asp.MapHub<SignalHub>("/Signal");
+
+        asp.Lifetime.ApplicationStarted.Register(() => {
+            var server = asp.Services.GetRequiredService<IServer>();
+            var addresses = server.Features.Get<IServerAddressesFeature>()?.Addresses ?? [];
+            
+            foreach (var address in addresses)
+                PamelloOutput.Write($"Listening on: {address}");
+        });
+        
         asp.MapControllers();
     }
     

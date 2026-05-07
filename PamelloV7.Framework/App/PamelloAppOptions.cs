@@ -28,4 +28,5 @@ public record PamelloAppOptions()
     );
     
     public bool UseApi { get; init; } = true;
+    public List<string> ApiUrls { get; init; } = [];
 }

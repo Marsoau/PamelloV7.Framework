@@ -13,13 +13,14 @@ namespace PamelloV7.Framework.SampleApp;
 public class TestNode
 {
     public int MyConfigValue { get; set; } = 123;
+    public ushort Port { get; set; } = 51630;
 }
 
 class Program
 {
     static async Task Main(string[] args) {
-        var app = PamelloApp.CreateBuilder(args, new PamelloAppOptions() {
-            UseApi = true,
+        var app = PamelloApp.CreateBuilder(args, options => {
+            options.ApiUrls.Add($"http://localhost:{TestConfig.Root.Port}");
         }).Build();
         
         await app.StartAsync();
