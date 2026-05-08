@@ -75,7 +75,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         
         //load modules here later
         
-        RepositoriesLoader.Load();
+        RepositoriesLoader.LoadRepositories();
         RepositoriesLoader.Configure(Services);
 
         if (_builder is WebApplicationBuilder webBuilder && Options.UseApi) {

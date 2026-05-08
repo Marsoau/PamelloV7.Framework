@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PamelloV7.Framework.Core.Logging;
+using PamelloV7.Framework.Repositories.Loaders;
 using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.App;
@@ -36,6 +37,10 @@ public partial class PamelloApp : IHost
     }
     
     public Task StartAsync(CancellationToken cancellationToken = default) {
+        var repositoriesLoader = Services.GetRequiredService<PamelloRepositoriesLoader>();
+        
+        repositoriesLoader.LoadAndInitEntities(Services);
+        
         if (_host is WebApplication asp && Options.UseApi) {
             StartupForApi(asp);
         }

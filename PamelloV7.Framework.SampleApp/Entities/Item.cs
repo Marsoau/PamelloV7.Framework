@@ -1,12 +1,20 @@
 using PamelloV7.Framework.Core.Entities;
+using PamelloV7.Framework.Shared.Entities.Dto;
 
 namespace PamelloV7.Framework.SampleApp.Entities;
 
-public class Item : PamelloBasicEntity
+public partial class Item
 {
-    public int Number { get; set; }
+    public partial int Number {
+        get; private set => field = value;
+    }
+}
+
+public partial class Item : PamelloBasicEntity
+{
+    public partial int Number { get; private set; }
     
-    private static int _idCounter = 0;
+    private static int _idCounter;
     public Item(int number) {
         Id = ++_idCounter;
         
