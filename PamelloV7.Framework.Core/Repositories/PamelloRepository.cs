@@ -15,6 +15,8 @@ public abstract class PamelloRepository<TEntity> : IPamelloRepository<TEntity>
         Services = services;
     }
 
+    public virtual IEnumerable<TEntity> GetAll() => Available;
+
     public virtual TEntity? Get(int id)
         => Available.FirstOrDefault(e => e.Id == id);
 

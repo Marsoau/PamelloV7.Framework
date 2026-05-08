@@ -6,8 +6,8 @@ public interface IPamelloBasicEntity
 {
     public int Id { get; }
     
-    public PamelloBasicEntityDto Dto => new() { Id = Id };
+    public PamelloBasicEntityDto Dto { get; }
 
-    public bool IsDeleted => false;
-    public bool IsAvailable() => !IsDeleted;
+    public bool IsDeleted { get; }
+    public bool IsAvailable();
 }

@@ -37,14 +37,24 @@ class Program
 
         IItemRepository items = new ItemRepository(app.Services);
 
-        var item = items.Add(new AlsoItem() {
+        items.Add(new AlsoItem() {
             SomeNumber = 123,
             AnotherNumber = 456
         });
-        
-        var alsoItem = items.GetRequired<AlsoItem>(item.Id);
+        items.Add(new AlsoItem() {
+            SomeNumber = 345,
+            AnotherNumber = 456
+        });
+        items.Add(new AlsoItem() {
+            SomeNumber = 456,
+            AnotherNumber = 456
+        });
 
-        Console.WriteLine($"Ids: {item.Id} & {alsoItem?.Id} : {item == alsoItem}, number: {item.SomeNumber}, another number: {item.AnotherNumber}");
+        foreach (var item in items.GetAll()) {
+            Console.WriteLine($"| {item}");
+        }
+
+        //Console.WriteLine($"Ids: {item.Id} & {alsoItem?.Id} : {item == alsoItem}, number: {item.SomeNumber}, another number: {item.AnotherNumber}");
         
         await app.WaitForShutdownAsync();
     }
