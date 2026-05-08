@@ -7,6 +7,7 @@ using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Data;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.Repositories;
+using PamelloV7.Framework.SampleApp.Entities;
 using PamelloV7.Framework.SampleApp.Repositories;
 using PamelloV7.Framework.SampleApp.Services;
 using PamelloV7.Framework.Shared.Variants.Attributes;
@@ -35,22 +36,16 @@ class Program
         
         await app.StartAsync();
 
-        IItemRepository items = new ItemRepository(app.Services);
+        var items = app.Services.GetRequiredService<IItemRepository>();
 
-        items.Add(new AlsoItem() {
-            SomeNumber = 123,
-            AnotherNumber = 456
-        });
-        items.Add(new AlsoItem() {
-            SomeNumber = 345,
-            AnotherNumber = 456
-        });
-        items.Add(new AlsoItem() {
-            SomeNumber = 456,
-            AnotherNumber = 456
-        });
+        items.Add(123);
+        items.Add(234);
+        items.Add(345);
+        items.Add(456);
+        
+        var anotherItems = app.Services.GetRequiredService<IPamelloRepository<Item>>();
 
-        foreach (var item in items.GetAll()) {
+        foreach (var item in anotherItems.GetAll()) {
             Console.WriteLine($"| {item}");
         }
 

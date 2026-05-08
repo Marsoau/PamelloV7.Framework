@@ -4,6 +4,7 @@ using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.Modules;
 using PamelloV7.Framework.Core.Services.Base;
 using PamelloV7.Framework.Core.Services.Loaders;
+using PamelloV7.Framework.Extensions;
 
 namespace PamelloV7.Framework.Services.Loaders;
 
@@ -19,11 +20,7 @@ public class PamelloServiceLoader : IPamelloServiceLoader
     
     public void LoadAppServices() {
         var serviceTypes = AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(
-                a => a.GetTypes() is { } types && !types.Any(
-                    t => t is { IsClass: true, IsAbstract: false } && t.IsSubclassOf(typeof(PamelloModule))
-                ) ? types : []
-            )
+            .SelectManyInNonModuleAssemblies()
             .Where(t => t is { IsClass: true, IsAbstract: false } && t.IsAssignableTo(typeof(IPamelloService)));
         
         AppServiceTypes.AddRange(serviceTypes);
@@ -34,9 +31,11 @@ public class PamelloServiceLoader : IPamelloServiceLoader
             collection.AddSingleton(serviceType);
 
             foreach (var interfaceType in serviceType.GetInterfaces()) {
-                if (interfaceType != typeof(IPamelloService) && interfaceType.IsAssignableTo(typeof(IPamelloService))) {
-                    collection.AddSingleton(interfaceType, services => services.GetRequiredService(serviceType));
-                }
+                if (interfaceType == typeof(IPamelloService) ||
+                    !interfaceType.IsAssignableTo(typeof(IPamelloService))
+                ) continue;
+                
+                collection.AddSingleton(interfaceType, services => services.GetRequiredService(serviceType));
             }
         }
     }

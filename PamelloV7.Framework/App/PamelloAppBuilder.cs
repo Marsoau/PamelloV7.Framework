@@ -10,6 +10,7 @@ using PamelloV7.Framework.Config.Loaders;
 using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.Modules.Loaders;
+using PamelloV7.Framework.Repositories.Loaders;
 using PamelloV7.Framework.Services.Loaders;
 
 namespace PamelloV7.Framework.App;
@@ -22,6 +23,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
     
     public readonly PamelloConfigLoader ConfigLoader;
     public readonly PamelloServiceLoader ServiceLoader;
+    public readonly PamelloRepositoriesLoader RepositoriesLoader;
     public readonly IPamelloModuleLoader ModuleLoader;
     
     public IDictionary<object, object> Properties => _builder.Properties;
@@ -36,6 +38,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         
         ConfigLoader = new PamelloConfigLoader(Options);
         ServiceLoader = new PamelloServiceLoader(Options);
+        RepositoriesLoader = new PamelloRepositoriesLoader(Options);
         ModuleLoader = null!;
 
         _builder = Options.UseApi
@@ -52,6 +55,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         
         Services.AddSingleton(ConfigLoader);
         Services.AddSingleton(ServiceLoader);
+        Services.AddSingleton(RepositoriesLoader);
 
         Services.AddSingleton(Services);
         
@@ -68,6 +72,11 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         
         ServiceLoader.LoadAppServices();
         ServiceLoader.ConfigureAppServices(Services);
+        
+        //load modules here later
+        
+        RepositoriesLoader.Load();
+        RepositoriesLoader.Configure(Services);
 
         if (_builder is WebApplicationBuilder webBuilder && Options.UseApi) {
             ConfigureForApi(webBuilder);
