@@ -15,7 +15,7 @@ public class DatabaseAccessService : IDatabaseAccessService
         var options = services.GetRequiredService<PamelloAppOptions>();
         
         var file = new FileInfo(Path.Combine(options.DataPath, "lite.db"));
-        if (!file.Directory?.Exists ?? false) file.Directory.Create();
+        if (!file.Directory?.Exists ?? false) file.Directory?.Create();
         
         _db = new LiteDatabase(file.FullName);
     }

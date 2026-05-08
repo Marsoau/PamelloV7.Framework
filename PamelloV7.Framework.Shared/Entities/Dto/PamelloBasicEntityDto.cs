@@ -1,6 +1,6 @@
 namespace PamelloV7.Framework.Shared.Entities.Dto;
 
-public class PamelloBasicEntityDto
+public abstract class PamelloBasicEntityDto
 {
     public int Id { get; set; }
 }

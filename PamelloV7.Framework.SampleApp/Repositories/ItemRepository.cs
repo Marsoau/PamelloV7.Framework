@@ -20,5 +20,5 @@ public class ItemRepository : PamelloRepository<Item>, IItemRepository
         return Available.Where(e => e.Number == number);
     }
 
-    public Item Add(int number) => Load(new Item(number));
+    public Item Add(int number) => LoadPamelloEntity(new Item(number));
 }
