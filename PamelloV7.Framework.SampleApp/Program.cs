@@ -6,6 +6,7 @@ using PamelloV7.Framework.Core.Config;
 using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Data;
 using PamelloV7.Framework.Core.Logging;
+using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.SampleApp.Repositories;
 using PamelloV7.Framework.SampleApp.Services;
 using PamelloV7.Framework.Shared.Variants.Attributes;
@@ -41,10 +42,9 @@ class Program
             AnotherNumber = 456
         });
         
-        var alsoItem = items.Get(item.Id);
+        var alsoItem = items.GetRequired<AlsoItem>(item.Id);
 
-        Console.WriteLine(item == alsoItem);
-        Console.WriteLine($"Ids: {item.Id} & {alsoItem?.Id}, number: {item.SomeNumber}, another number: {item.AnotherNumber}");
+        Console.WriteLine($"Ids: {item.Id} & {alsoItem?.Id} : {item == alsoItem}, number: {item.SomeNumber}, another number: {item.AnotherNumber}");
         
         await app.WaitForShutdownAsync();
     }

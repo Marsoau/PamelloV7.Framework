@@ -37,8 +37,5 @@ public class ItemRepository : PamelloRepository<Item>, IItemRepository
     
     public TType Add<TType>(TType item)
         where TType : Item
-    {
-        Loaded.Add(item);
-        return item;
-    }
+        => (TType)Load(item);
 }

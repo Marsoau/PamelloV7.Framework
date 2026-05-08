@@ -3,21 +3,26 @@ using PamelloV7.Framework.Shared.Entities.Base;
 
 namespace PamelloV7.Framework.Core.Repositories;
 
-public class PamelloRepository<TEntity> : IPamelloRepository<TEntity>
+public abstract class PamelloRepository<TEntity> : IPamelloRepository<TEntity>
     where TEntity : class, IPamelloBasicEntity
 {
     protected readonly IServiceProvider Services;
     
     protected List<TEntity> Loaded = [];
+    protected IEnumerable<TEntity> Available => Loaded.Where(e => e.IsAvailable());
 
     public PamelloRepository(IServiceProvider services) {
         Services = services;
     }
-    
-    public virtual TType? Get<TType>(int id) where TType : class, IPamelloBasicEntity {
-        if (Loaded.FirstOrDefault(e => e.Id == id) is TType entity && entity.IsAvailable())
-            return entity;
+
+    public virtual TEntity? Get(int id)
+        => Available.FirstOrDefault(e => e.Id == id);
+
+    protected virtual TEntity Load(TEntity entity) {
+        if (Loaded.Any(e => e.Id == entity.Id)) throw new PamelloDatabaseException($"Entity with id {entity.Id} already loaded to {GetType().Name}");
         
-        return null;
+        Loaded.Add(entity);
+        
+        return entity;
     }
 }
