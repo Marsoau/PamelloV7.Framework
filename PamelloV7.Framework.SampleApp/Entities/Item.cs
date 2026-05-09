@@ -1,9 +1,11 @@
 using PamelloV7.Framework.Core.Entities;
+using PamelloV7.Framework.Shared.Attributes;
 using PamelloV7.Framework.Shared.Entities.Dto;
 
 namespace PamelloV7.Framework.SampleApp.Entities;
 
-public partial class Item : PamelloBasicEntity
+[AutoInherit(typeof(PamelloBasicEntity), [])]
+public partial class Item
 {
     public int Number { get; private set; }
     
