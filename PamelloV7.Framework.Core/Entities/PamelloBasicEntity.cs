@@ -5,8 +5,8 @@ namespace PamelloV7.Framework.Core.Entities;
 
 public abstract class PamelloBasicEntity : IPamelloBasicEntity
 {
-    public int Id { get; init; }
-
+    public abstract int Id { get; }
+    
     public abstract PamelloBasicEntityDto GetDto();
     
     public virtual bool IsDeleted => false;

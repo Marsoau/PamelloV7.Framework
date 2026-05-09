@@ -1,18 +1,19 @@
 using PamelloV7.Framework.Core.Entities;
+using PamelloV7.Framework.Core.Entities.Attributes;
 using PamelloV7.Framework.Shared.Attributes;
 using PamelloV7.Framework.Shared.Entities.Dto;
 
 namespace PamelloV7.Framework.SampleApp.Entities;
 
-[AutoInherit(typeof(PamelloBasicEntity), [])]
+[PamelloBasicEntity]
 public partial class Item
 {
+    private static int _idCounter;
+    public override int Id { get; } = ++_idCounter;
+    
     public int Number { get; private set; }
     
-    private static int _idCounter;
     public Item(int number) {
-        Id = ++_idCounter;
-        
         Number = number;
     }
 
