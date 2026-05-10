@@ -23,19 +23,16 @@ public class AutoInheritanceGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(classDeclarations, (c, d) => Generate(c, d!));
     }
 
-    public static IEnumerable<INamedTypeSymbol> GetAutoInheritanceTypes(INamedTypeSymbol classSymbol) {
-        var visited = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-        var yielded = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-        return GetAutoInheritanceTypesCore(classSymbol, isFirstClass: true, visited, yielded);
-    }
-
-    private static IEnumerable<INamedTypeSymbol> GetAutoInheritanceTypesCore(
+    private static HashSet<INamedTypeSymbol> GetAutoInheritanceTypes(
         INamedTypeSymbol classSymbol,
-        bool isFirstClass,
-        HashSet<INamedTypeSymbol> visited,
-        HashSet<INamedTypeSymbol> yielded
+        bool isFirstClass = true,
+        HashSet<INamedTypeSymbol>? visited = null,
+        HashSet<INamedTypeSymbol>? yielded = null
     ) {
-        if (!visited.Add(classSymbol)) yield break;
+        visited ??= new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+        yielded ??= new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+        
+        if (!visited.Add(classSymbol)) return yielded;
 
         const string attributeName = "AutoInheritAttribute";
 
@@ -45,7 +42,7 @@ public class AutoInheritanceGenerator : IIncrementalGenerator
 
             if (attributeClass.Name == attributeName) {
                 if (isFirstClass && attribute?.ConstructorArguments.ElementAtOrDefault(0).Value is INamedTypeSymbol inheritanceClass) {
-                    if (yielded.Add(inheritanceClass)) yield return inheritanceClass;
+                    yielded.Add(inheritanceClass);
                     isFirstClass = false;
                 }
 
@@ -53,20 +50,18 @@ public class AutoInheritanceGenerator : IIncrementalGenerator
                         .Select(v => v.Value)
                         .OfType<INamedTypeSymbol>() ?? []
                 ) {
-                    if (yielded.Add(interfaceType)) yield return interfaceType;
+                    yielded.Add(interfaceType);
                 }
             }
 
-            foreach (var type in GetAutoInheritanceTypesCore(attributeClass, isFirstClass, visited, yielded)) {
-                yield return type;
-            }
+            GetAutoInheritanceTypes(attributeClass, isFirstClass, visited, yielded);
         }
 
-        if (classSymbol.BaseType is null || classSymbol.BaseType.Name == "Object") yield break;
-
-        foreach (var type in GetAutoInheritanceTypesCore(classSymbol.BaseType, isFirstClass, visited, yielded)) {
-            yield return type;
-        }
+        if (classSymbol.BaseType is null || classSymbol.BaseType.Name == "Object") return yielded;
+        
+        GetAutoInheritanceTypes(classSymbol.BaseType, isFirstClass, visited, yielded);
+        
+        return yielded;
     }
 
     public static AttributeData? GetAttributeInClass(INamedTypeSymbol classSymbol, string attributeName, int depth = 0) {
