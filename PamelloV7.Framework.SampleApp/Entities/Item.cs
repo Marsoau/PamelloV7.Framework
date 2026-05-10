@@ -11,7 +11,7 @@ public partial class Item
     public partial int Number { get; set; }
     
     public Item(int number) {
-        Number = number;
+        _number = number;
     }
 
     public override string ToString() {

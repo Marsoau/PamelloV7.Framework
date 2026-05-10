@@ -4,40 +4,32 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using PamelloV7.Framework.Shared.Generators.Base;
 using PamelloV7.Framework.Shared.Generators.Extensions;
 using PamelloV7.Framework.Shared.Generators.Helpers;
 
 namespace PamelloV7.Framework.Core.Generators.Config;
 
 [Generator]
-public class StaticConfigGenerator : IIncrementalGenerator
+public class StaticConfigGenerator : PamelloGenerator<ConfigRootPartDescriptor>
 {
-    public void Initialize(IncrementalGeneratorInitializationContext context) {
-        var classDeclarations = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                predicate: (node, _) => node is ClassDeclarationSyntax { AttributeLists.Count: > 0 }, 
-                transform: GetDescriptor
-            )
-            .Where(static m => m is not null);
+    protected override bool Predicate(SyntaxNode node, CancellationToken cancellationToken)
+        => node is ClassDeclarationSyntax { AttributeLists.Count: > 0 };
 
-        context.RegisterSourceOutput(classDeclarations, (c, d) => Generate(c, d!));
-    }
-
-    private static ConfigRootPartDescriptor? GetDescriptor(GeneratorSyntaxContext context, CancellationToken cancellationToken) {
-        if (context.SemanticModel.GetDeclaredSymbol(context.Node, cancellationToken) is not INamedTypeSymbol rootNodeClass) {
-            return null;
-        }
+    protected override ConfigRootPartDescriptor? GetDescriptorInternal(
+        GeneratorSyntaxContext context,
+        INamedTypeSymbol rootNodeClass,
+        StringBuilder debugOutput
+    ) {
         if (rootNodeClass.GetAttributes().FirstOrDefault(a => a.AttributeClass?.Name == "ConfigRootAttribute") is not { } attribute) {
             return null;
         }
         
-        var debug = new StringBuilder();
-        
-        debug.AppendLine($"Found {rootNodeClass.Name}");
+        debugOutput.AppendLine($"Found {rootNodeClass.Name}");
         
         return new ConfigRootPartDescriptor(
             rootNodeClass,
-            debug
+            debugOutput
         );
     }
 
@@ -67,13 +59,10 @@ public class StaticConfigGenerator : IIncrementalGenerator
         return sb.ToString();
     }
         
-    private static void Generate(SourceProductionContext context, ConfigRootPartDescriptor descriptor) {
+
+    protected override void Generate(ConfigRootPartDescriptor descriptor, StringBuilder generatorSb) {
         var source =
             $$"""
-            /* debug output
-            {{descriptor.DebugOutput}}
-            */
-            
             using PamelloV7.Framework.Core.Config.Parts;
             
             {{SharedHelper.GetNamespaceDeclaration(descriptor.RootNodeClass)}}
@@ -89,6 +78,8 @@ public class StaticConfigGenerator : IIncrementalGenerator
             
             """;
         
-        context.AddSource($"{AdjustedName(descriptor.RootNodeClass.Name, "Node")}Config.g.cs", SourceText.From(source, Encoding.UTF8));
+        generatorSb.AppendLine(
+            source
+        );
     }
 }
