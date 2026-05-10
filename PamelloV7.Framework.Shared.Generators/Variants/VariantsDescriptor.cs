@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.CodeAnalysis;
+using PamelloV7.Framework.Shared.Generators.Base;
 
 namespace PamelloV7.Framework.Shared.Generators.Variants;
 
@@ -17,7 +18,10 @@ public record ParameterVariantsDescriptor(
 );
 
 public record VariantsDescriptor(
-    ITypeSymbol Class,
+    INamedTypeSymbol Class,
     Dictionary<IMethodSymbol, List<ParameterVariantsDescriptor>> ParametersWithVariants,
     StringBuilder DebugOutput
+) : PamelloDescriptor(
+    Class,
+    DebugOutput
 );

@@ -14,9 +14,15 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" PrivateAssets="all" />
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.3.0" PrivateAssets="all" />
+        
         <Compile Include="..\PamelloV7.Framework.Shared.Generators\Helpers\SharedHelper.cs"
                  Link="Helpers/SharedHelper.cs" />
         <Compile Include="..\PamelloV7.Framework.Shared.Generators\Helpers\TypeSymbolExtensions.cs"
                  Link="Helpers/TypeSymbolExtensions.cs" />
+        
+        <Compile Include="..\PamelloV7.Framework.Shared.Generators\Base\PamelloDescriptor.cs"
+                 Link="Base/PamelloDescriptor.cs" />
+        <Compile Include="..\PamelloV7.Framework.Shared.Generators\Base\PamelloGenerator.cs"
+                 Link="Base/PamelloGenerator.cs" />
     </ItemGroup>
 </Project>

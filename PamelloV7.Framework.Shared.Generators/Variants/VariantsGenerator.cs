@@ -2,31 +2,23 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using PamelloV7.Framework.Shared.Generators.Base;
 using PamelloV7.Framework.Shared.Generators.Extensions;
 using PamelloV7.Framework.Shared.Generators.Helpers;
 
 namespace PamelloV7.Framework.Shared.Generators.Variants;
 
 [Generator]
-public class VariantsGenerator : IIncrementalGenerator
+public class VariantsGenerator : PamelloGenerator<VariantsDescriptor>
 {
-    public void Initialize(IncrementalGeneratorInitializationContext context) {
-        var classDeclarations = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                predicate: (node, _) => node is ClassDeclarationSyntax, 
-                transform: GetDescriptor
-            )
-            .Where(static m => m is not null);
+    protected override bool Predicate(SyntaxNode node, CancellationToken cancellationToken)
+        => node is ClassDeclarationSyntax;
 
-        context.RegisterSourceOutput(classDeclarations, (c, d) => Generate(c, d!));
-    }
-    
-    private static VariantsDescriptor? GetDescriptor(GeneratorSyntaxContext context, CancellationToken cancellationToken) {
-        if (context.SemanticModel.GetDeclaredSymbol(context.Node, cancellationToken) is not INamedTypeSymbol classType)
-            return null;
-
-        var debug = new StringBuilder();
-
+    protected override VariantsDescriptor? GetDescriptorInternal(
+        GeneratorSyntaxContext context,
+        INamedTypeSymbol classType,
+        StringBuilder debugOutput
+    ) {
         var methods = new Dictionary<IMethodSymbol, List<ParameterVariantsDescriptor>>(SymbolEqualityComparer.Default);
             
         foreach (var method in classType.GetMembers().OfType<IMethodSymbol>()) {
@@ -51,7 +43,7 @@ public class VariantsGenerator : IIncrementalGenerator
 
                     if (variantMethod.ReturnType is INamedTypeSymbol { IsTupleType: true } tupleType) {
                         foreach (var tupleElement in tupleType.TupleElements) {
-                            debug.AppendLine($"Element: {tupleElement.Name}: {tupleElement.Type.GetFullName()}");
+                            debugOutput.AppendLine($"Element: {tupleElement.Name}: {tupleElement.Type.GetFullName()}");
                         }
                     }
                     
@@ -62,7 +54,7 @@ public class VariantsGenerator : IIncrementalGenerator
                     ));
                 }
 
-                debug.AppendLine($"Variants: {variants.Count}");
+                debugOutput.AppendLine($"Variants: {variants.Count}");
                 
                 if (variants.Any()) variants.Insert(0, null);
                 else if (requiredAttribute is null) continue;
@@ -76,7 +68,7 @@ public class VariantsGenerator : IIncrementalGenerator
                     requiredAttribute is not null
                 ));
                 
-                debug.AppendLine($"Parameter: {method.Name} | {parameter.Name} | {string.Join(", ",
+                debugOutput.AppendLine($"Parameter: {method.Name} | {parameter.Name} | {string.Join(", ",
                     variants.Select(v => v is null ? "nov" : v.VariantMethod.Name)
                 )}");
             }
@@ -84,10 +76,12 @@ public class VariantsGenerator : IIncrementalGenerator
         
         if (!methods.Any()) return null;
         
+        debugOutput.AppendLine($"Found {methods.Count} methods in {classType.Name} | {classType.GetFullName()}");
+        
         return new VariantsDescriptor(
             classType,
             methods,
-            debug
+            debugOutput
         );
     }
     
@@ -267,10 +261,9 @@ public class VariantsGenerator : IIncrementalGenerator
         sb.AppendLine("}");
     }
 
-    private static void Generate(SourceProductionContext context, VariantsDescriptor descriptor) {
-        var classNamespace = SharedHelper.GetNamespace(descriptor.Class);
+    protected override void Generate(VariantsDescriptor descriptor, StringBuilder generatorSb) {
+        var methodsSb = new StringBuilder();
         
-        var sb = new StringBuilder();
         foreach (var kvp in descriptor.ParametersWithVariants) {
             var method = kvp.Key;
             var variants = kvp.Value;
@@ -280,26 +273,17 @@ public class VariantsGenerator : IIncrementalGenerator
             foreach (var final in GetVariantsFlows(method, variants, null, 0).Skip(1)) {
                 descriptor.DebugOutput.AppendLine($"Final: {final.Method.Name} | {final.TypeParameters.Count}");
                 
-                WriteFinal(sb, final);
+                WriteFinal(methodsSb, final);
                 //if (isRequired) WriteFinal(sb, final, true);
             }
         }
 
-        var source =
-            $$"""
-              namespace {{classNamespace}};
-              
-              {{SharedHelper.WriteInsideClasses(
-                  descriptor.Class,
-                  $"",
-                  sb.ToString()
-              )}}
-              
-              /* debug output
-              {{descriptor.DebugOutput}}
-              */
-              """;
-        
-        context.AddSource($"{descriptor.Class.Name}.Variants.g.cs", SourceText.From(source, Encoding.UTF8));
+        generatorSb.AppendLine(
+            SharedHelper.WriteInsideType(
+                descriptor.Class,
+                $"",
+                methodsSb.ToString()
+            ).ToString()
+        );
     }
 }

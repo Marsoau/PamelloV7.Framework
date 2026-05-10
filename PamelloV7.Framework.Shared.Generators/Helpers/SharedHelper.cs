@@ -37,33 +37,47 @@ public static class SharedHelper
         }
     }
 
-    public static void WriteInsideClasses(ITypeSymbol[] classTypes, string inheritancePart, string innerPart, StringBuilder sb, int depth = 0) {
+    public static void WriteInsideType(ITypeSymbol[] classTypes, string inheritancePart, string innerPart, bool useBodyNamespace, StringBuilder sb, int tabs, int depth) {
         if (classTypes.Length == 0) return;
+
+        sb.Append($"{Tab(tabs)}namespace {GetNamespace(classTypes[depth])}");
+        if (useBodyNamespace) {
+            sb.AppendLine(" {");
+            tabs++;
+        }
+        else {
+            sb.AppendLine(";");
+            sb.AppendLine();
+        }
         
-        sb.Append($"{Tab(depth)}{GetTypeModifiers(classTypes[depth])} class {classTypes[depth].Name} ");
+        sb.Append($"{Tab(tabs)}{GetTypeModifiers(classTypes[depth])} class {classTypes[depth].Name} ");
         
         if (depth + 1 >= classTypes.Length) {
             sb.AppendLine($"{inheritancePart}{(
                 inheritancePart.LastOrDefault() == ' ' ? "{" : " {"
             )}");
 
-            sb.Append(Tab(depth + 1));
-            sb.AppendLine(innerPart.Replace("\n", $"\n{Tab(depth + 1)}"));
+            sb.Append(Tab(tabs + 1));
+            sb.AppendLine(innerPart.Replace("\n", $"\n{Tab(tabs + 1)}"));
             
-            sb.AppendLine($"{Tab(depth)}}}");
+            sb.AppendLine($"{Tab(tabs)}}}");
             return;
         }
 
         sb.AppendLine($"{{");
-        WriteInsideClasses(classTypes, inheritancePart, innerPart, sb, depth + 1);
-        sb.AppendLine($"{Tab(depth)}}}");
+        WriteInsideType(classTypes, inheritancePart, innerPart, false, sb, tabs + 1, depth + 1);
+        sb.AppendLine($"{Tab(tabs)}}}");
+        
+        if (useBodyNamespace) {
+            sb.AppendLine($"{Tab(tabs - 1)}}}");
+        }
     }
     
-    public static StringBuilder WriteInsideClasses(ITypeSymbol type, string inheritancePart, string innerPart) {
+    public static StringBuilder WriteInsideType(ITypeSymbol type, string inheritancePart, string innerPart, bool useBodyNamespace = false) {
         var sb = new StringBuilder();
         
         var containingTypes = GetContainingTypes(type).ToArray();
-        WriteInsideClasses([..containingTypes, type], inheritancePart, innerPart, sb);
+        WriteInsideType([..containingTypes, type], inheritancePart, innerPart, useBodyNamespace, sb, 0, 0);
         
         return sb;
     }

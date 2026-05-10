@@ -1,28 +1,20 @@
-using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
+using PamelloV7.Framework.Shared.Generators.Base;
 using PamelloV7.Framework.Shared.Generators.Extensions;
 using PamelloV7.Framework.Shared.Generators.Helpers;
 
 namespace PamelloV7.Framework.Shared.Generators.Inheritance;
 
 [Generator]
-public class AutoInheritanceGenerator : IIncrementalGenerator
+public class AutoInheritanceGenerator : PamelloGenerator<AutoInheritanceDescriptor>
 {
-    public void Initialize(IncrementalGeneratorInitializationContext context) {
-        var classDeclarations = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                predicate: (node, _) => node is ClassDeclarationSyntax { AttributeLists.Count: > 0 }, 
-                transform: GetDescriptor
-            )
-            .Where(static m => m is not null);
-
-        context.RegisterSourceOutput(classDeclarations, (c, d) => Generate(c, d!));
-    }
-
+    private const string AttributeName = "AutoInheritAttribute";
+    
+    protected override bool Predicate(SyntaxNode node, CancellationToken cancellationToken)
+        => node is ClassDeclarationSyntax { AttributeLists.Count: > 0 };
+    
     private static HashSet<INamedTypeSymbol> GetAutoInheritanceTypes(
         INamedTypeSymbol classSymbol,
         bool isFirstClass = true,
@@ -34,13 +26,11 @@ public class AutoInheritanceGenerator : IIncrementalGenerator
         
         if (!visited.Add(classSymbol)) return yielded;
 
-        const string attributeName = "AutoInheritAttribute";
-
         foreach (var attribute in classSymbol.GetAttributes()) {
             var attributeClass = attribute?.AttributeClass;
             if (attributeClass is null) continue;
 
-            if (attributeClass.Name == attributeName) {
+            if (attributeClass.Name == AttributeName) {
                 if (isFirstClass && attribute?.ConstructorArguments.ElementAtOrDefault(0).Value is INamedTypeSymbol inheritanceClass) {
                     yielded.Add(inheritanceClass);
                     isFirstClass = false;
@@ -64,77 +54,45 @@ public class AutoInheritanceGenerator : IIncrementalGenerator
         return yielded;
     }
 
-    public static AttributeData? GetAttributeInClass(INamedTypeSymbol classSymbol, string attributeName, int depth = 0) {
-        //if (depth >= 3) return null;
-        
-        foreach (var attribute in classSymbol.GetAttributes()) {
-            var attributeClass = attribute?.AttributeClass;
-            if (attributeClass is null) continue;
-            
-            if (attributeClass.Name == attributeName) return attribute;
-            
-            var data = GetAttributeInClass(attributeClass, attributeName, depth + 1);
-            if (data is not null) return data;
-        }
-
-        if (classSymbol.BaseType is not null) {
-            return GetAttributeInClass(classSymbol.BaseType, attributeName, depth + 1);
-        }
-        
-        return null;
-    }
-    
-    private static AutoInheritanceDescriptor? GetDescriptor(GeneratorSyntaxContext context, CancellationToken cancellationToken) {
-        if (context.SemanticModel.GetDeclaredSymbol(context.Node, cancellationToken) is not INamedTypeSymbol classType) {
-            return null;
-        }
-        if (classType.BaseType is null || classType.BaseType.Name != "Object") {
+    protected override AutoInheritanceDescriptor? GetDescriptorInternal(
+        GeneratorSyntaxContext context,
+        INamedTypeSymbol targetType,
+        StringBuilder debugOutput
+    ) {
+        if (targetType.BaseType is null || targetType.BaseType.Name != "Object") {
             return null;
         }
         
-        var types = GetAutoInheritanceTypes(classType).ToList();
+        var types = GetAutoInheritanceTypes(targetType).ToList();
         if (types.Count == 0) return null;
         
-        var debug = new StringBuilder();
-        
-        debug.AppendLine($"Found in {classType.Name}");
+        debugOutput.AppendLine($"Found in {targetType.Name}");
 
         var hasClassFirst = types.FirstOrDefault() is { IsImplicitClass: true };
         
         return new AutoInheritanceDescriptor(
-            classType,
+            targetType,
             hasClassFirst
                 ? types.First()
                 : null,
             types.Skip(hasClassFirst ? 1 : 0).ToArray(),
-            debug
+            debugOutput
         );
     }
 
-    private static void Generate(SourceProductionContext context, AutoInheritanceDescriptor descriptor) {
-        var classNamespace = SharedHelper.GetNamespace(descriptor.ClassType);
-        
+    protected override void Generate(AutoInheritanceDescriptor descriptor, StringBuilder generatorSb) {
         var types = descriptor.InheritanceInterfaces.Prepend(descriptor.InheritanceClass)
             .OfType<ITypeSymbol>()
             .ToArray();
-        
-        var sb = SharedHelper.WriteInsideClasses(
-            descriptor.ClassType,
-            $" : {string.Join(", ", types.Select(t => t.GetFullName()))}",
-            "//nothing"
-        );
 
-        var source =
-            $$"""
-              /* debug output
-              {{descriptor.DebugOutput}}
-              */
-              
-              namespace {{classNamespace}};
-              
-              {{sb}}
-              """;
-        
-        context.AddSource($"{descriptor.ClassType.Name}.AutoInheritance.g.cs", SourceText.From(source, Encoding.UTF8));
+        generatorSb.AppendLine(
+            SharedHelper.WriteInsideType(
+                descriptor.ClassType,
+                types.Length > 0
+                    ? $" : {string.Join(", ", types.Select(t => t.GetFullName()))}"
+                    : "",
+                "//nothing"
+            ).ToString()
+        );
     }
 }
