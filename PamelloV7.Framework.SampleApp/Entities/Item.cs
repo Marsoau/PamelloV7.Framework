@@ -8,10 +8,7 @@ namespace PamelloV7.Framework.SampleApp.Entities;
 [PamelloBasicEntity]
 public partial class Item
 {
-    private static int _idCounter;
-    public override int Id { get; } = ++_idCounter;
-    
-    public int Number { get; private set; }
+    public partial int Number { get; set; }
     
     public Item(int number) {
         Number = number;
@@ -19,9 +16,5 @@ public partial class Item
 
     public override string ToString() {
         return $"[{Id}] {Number}";
-    }
-
-    public override PamelloBasicEntityDto GetDto() {
-        throw new NotImplementedException();
     }
 }

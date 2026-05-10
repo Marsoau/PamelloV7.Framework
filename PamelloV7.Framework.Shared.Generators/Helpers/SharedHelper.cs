@@ -8,6 +8,41 @@ namespace PamelloV7.Framework.Shared.Generators.Helpers;
 public static class SharedHelper
 {
     public static string Tab(int count) => string.Join("", Enumerable.Repeat("    ", count));
+
+    public static AttributeData? GetAttributeByName(
+        INamedTypeSymbol? typeSymbol,
+        string attributeName,
+        bool goIntoBaseTypes = false
+    ) {
+        if (typeSymbol is null) return null;
+        
+        if (typeSymbol.GetAttributes().FirstOrDefault(a => a.AttributeClass?.Name == attributeName) is { } attribute) {
+            return attribute;
+        }
+        
+        return goIntoBaseTypes && typeSymbol.BaseType is not null && typeSymbol.BaseType.Name != "Object"
+            ? GetAttributeByName(typeSymbol.BaseType, attributeName, false)
+            : null;
+    }
+    
+    public static bool CheckTypeName(
+        INamedTypeSymbol? typeSymbol,
+        string name,
+        bool goIntoBaseTypes = true
+    ) {
+        if (typeSymbol is null) return false;
+        if (typeSymbol.Name == name) return true;
+        
+        return
+            goIntoBaseTypes &&
+            typeSymbol.BaseType is not null &&
+            typeSymbol.BaseType.Name != "Object" &&
+            CheckTypeName(
+                typeSymbol.BaseType,
+                name,
+                false
+            );
+    }
     
     public static string GetNamespace(ITypeSymbol classSymbol) {
         return classSymbol.ContainingNamespace.IsGlobalNamespace 
@@ -54,7 +89,7 @@ public static class SharedHelper
         
         if (depth + 1 >= classTypes.Length) {
             sb.AppendLine($"{inheritancePart}{(
-                inheritancePart.LastOrDefault() == ' ' ? "{" : " {"
+                inheritancePart.Length == 0 || inheritancePart.LastOrDefault() != ' ' ? " {" : "{"
             )}");
 
             sb.Append(Tab(tabs + 1));
@@ -135,10 +170,10 @@ public static class SharedHelper
         return "";
     }
     
-    public static string GetMethodModifiers(IMethodSymbol methodSymbol) {
+    public static string GetSymbolModifiers(ISymbol symbol) {
         var modifiers = new List<string>();
 
-        var accessibility = methodSymbol.DeclaredAccessibility switch {
+        var accessibility = symbol.DeclaredAccessibility switch {
             Accessibility.Public => "public",
             Accessibility.Internal => "internal",
             Accessibility.Protected => "protected",
@@ -150,15 +185,15 @@ public static class SharedHelper
 
         if (!string.IsNullOrEmpty(accessibility))
             modifiers.Add(accessibility);
-        if (methodSymbol.IsStatic)
+        if (symbol.IsStatic)
             modifiers.Add("static");
-        if (methodSymbol.IsAbstract)
+        if (symbol.IsAbstract)
             modifiers.Add("abstract");
-        if (methodSymbol.IsVirtual)
+        if (symbol.IsVirtual)
             modifiers.Add("virtual");
-        if (methodSymbol.IsOverride)
+        if (symbol.IsOverride)
             modifiers.Add("override");
-        if (methodSymbol.IsExtern)
+        if (symbol.IsExtern)
             modifiers.Add("extern");
 
         return string.Join(" ", modifiers);

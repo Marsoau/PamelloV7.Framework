@@ -249,7 +249,7 @@ public class VariantsGenerator : PamelloGenerator<VariantsDescriptor>
             returnType = SharedHelper.MakeNonNullable(final.Method.ReturnType).GetFullName();
         }
         
-        sb.AppendLine($"{SharedHelper.GetMethodModifiers(final.Method)} {returnType} {GetFinalMethodName(final, isRequired)}(");
+        sb.AppendLine($"{SharedHelper.GetSymbolModifiers(final.Method)} {returnType} {GetFinalMethodName(final, isRequired)}(");
         sb.Append("    ");
         sb.AppendLine(string.Join(",\n    ", GetFinalMethodInputFlowReversed(final).Reverse().Distinct()));
         sb.AppendLine($") {GetFinalMethodConstraints(final)} {{");
