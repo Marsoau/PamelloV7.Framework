@@ -10,6 +10,7 @@ using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.SampleApp.Entities;
 using PamelloV7.Framework.SampleApp.Repositories;
 using PamelloV7.Framework.SampleApp.Services;
+using PamelloV7.Framework.Shared.Attributes;
 using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.SampleApp;
@@ -49,8 +50,6 @@ class Program
             Console.WriteLine($"| {item}");
         }
 
-        //Console.WriteLine($"Ids: {item.Id} & {alsoItem?.Id} : {item == alsoItem}, number: {item.SomeNumber}, another number: {item.AnotherNumber}");
-        
         await app.WaitForShutdownAsync();
     }
 }
