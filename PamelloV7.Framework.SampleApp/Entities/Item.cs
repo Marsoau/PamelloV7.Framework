@@ -9,13 +9,13 @@ namespace PamelloV7.Framework.SampleApp.Entities;
 public partial class Item
 {
     public partial int Number { get; set; }
-    public partial int AnotherNumber { get; set; }
+    public partial string Message { get; set; }
     
     public Item(int number) {
         _number = number;
     }
 
     public override string ToString() {
-        return $"[{Id}] {Number}";
+        return $"[{Id}] {Number} \"{Message}\"";
     }
 }

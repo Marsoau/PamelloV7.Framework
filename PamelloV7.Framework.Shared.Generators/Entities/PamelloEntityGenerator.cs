@@ -11,7 +11,9 @@ namespace PamelloV7.Framework.Shared.Generators.Entities;
 public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
 {
     public static string PamelloBasicEntityAttributeName = "PamelloBasicEntityAttribute";
-    public static string PamelloDtoClassFullName = "global::PamelloV7.Framework.Shared.Entities.Dto.PamelloBasicEntityDto";
+    
+    public static string PamelloDtoClassFullName = "global::PamelloV7.Framework.Shared.Entities.Dto.PamelloBasicDto";
+    public static string PamelloDboClassFullName = "global::PamelloV7.Framework.Core.Entities.Dbo.PamelloBasicDbo";
     
     protected override bool Predicate(SyntaxNode node, CancellationToken cancellationToken)
         => node is ClassDeclarationSyntax { AttributeLists.Count: > 0 };
@@ -94,6 +96,7 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
                     {{WriteUpdatablePropertyGetter(propertyDescriptor)}}
                     {{WriteUpdatablePropertySetter(propertyDescriptor)}}
                 }
+                
                 """
             );
         }
@@ -101,31 +104,72 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
         return updatablePropertiesSb.ToString();
     }
 
-    public static string GetEntityDtoSource(PamelloEntityDescriptor descriptor) {
+    public static string GetEntityDtoAndDboClassesSource(PamelloEntityDescriptor descriptor) {
         var dtoClassSb = new StringBuilder();
-        var dtoGetterSb = new StringBuilder();
+        var dboClassSb = new StringBuilder();
         
         dtoClassSb.AppendLine($"public partial class Dto : {PamelloDtoClassFullName} {{");
+        dboClassSb.AppendLine($"public partial class Dbo : {PamelloDboClassFullName} {{");
 
         foreach (var propertyDescriptor in descriptor.UpdatableProperties) {
-            dtoClassSb.AppendLine(
-                $"{SharedHelper.Tab(1)}public required {
-                    propertyDescriptor.Property.Type.GetFullName()
-                } {
-                    propertyDescriptor.Property.Name
-                } {{ get; set; }}"
-            );
+            var line = $"{SharedHelper.Tab(1)}public required {
+                propertyDescriptor.Property.Type.GetFullName()
+            } {
+                propertyDescriptor.Property.Name
+            } {{ get; set; }}";
+            
+            dtoClassSb.AppendLine(line);
+            dboClassSb.AppendLine(line);
         }
         
         dtoClassSb.AppendLine("}");
+        dboClassSb.AppendLine("}");
+        
+        return $"{dtoClassSb}\n{dboClassSb}";
+    }
+
+    public static string GetEntityDtoAndDboGetter(PamelloEntityDescriptor descriptor) {
+        var dtoGetterSb = new StringBuilder();
+        var dboGetterSb = new StringBuilder();
 
         dtoGetterSb.AppendLine($"public override Dto GetDto() => new Dto() {{");
-        dtoGetterSb.AppendLine(string.Join(",\n", descriptor.UpdatableProperties.Select(p => 
-            $"{SharedHelper.Tab(1)}{p.Property.Name} = {p.Property.Name}"
-        )));
+        dboGetterSb.AppendLine($"public Dbo GetDbo() => new Dbo() {{");
+        
+        dtoGetterSb.AppendLine(string.Join(",\n", descriptor.UpdatableProperties
+            .Select(p => p.Property.Name)
+            .Prepend("Id")
+            .Select(name => 
+                $"{SharedHelper.Tab(1)}{name} = {name}"
+            )
+        ));
+        dboGetterSb.AppendLine(string.Join(",\n", descriptor.UpdatableProperties
+            .Select(p => p.Property.Name)
+            .Prepend("Id")
+            .Select(name => 
+                $"{SharedHelper.Tab(1)}{name} = {ToPrivateFieldName(name)}"
+            )
+        ));
+        
         dtoGetterSb.AppendLine("};");
+        dboGetterSb.AppendLine("};");
 
-        return $"{dtoClassSb}\n\n{dtoGetterSb}";
+        return $"{dtoGetterSb}\n{dboGetterSb}";
+    }
+
+    public static string GetEntityDboConstructor(PamelloEntityDescriptor descriptor) {
+        var sb = new StringBuilder();
+        
+        sb.AppendLine($"public {descriptor.InvokingType.Name}(Dbo dbo) : base() {{");
+        sb.AppendLine(string.Join("\n", descriptor.UpdatableProperties
+            .Select(p => p.Property.Name)
+            .Prepend("Id")
+            .Select(name => 
+                $"{SharedHelper.Tab(1)}{ToPrivateFieldName(name)} = dbo.{name};"
+            )
+        ));
+        sb.AppendLine("}");
+        
+        return sb.ToString();
     }
 
     protected override void Generate(PamelloEntityDescriptor descriptor, StringBuilder generatorSb) {
@@ -137,13 +181,16 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
                 {{(descriptor.NeedsIdGenerated ? """
                 private static int _idCounter = 0;
                 
-                public override int Id { get; } = ++_idCounter;
+                private int _id = ++_idCounter;
+                public override int Id => _id;
                 
                 """ : "")}}
                 
-                {{GetUpdatablePropertiesSource(descriptor)}}
+                {{GetEntityDboConstructor(descriptor)}}
                 
-                {{GetEntityDtoSource(descriptor)}}
+                {{GetUpdatablePropertiesSource(descriptor)}}
+                {{GetEntityDtoAndDboClassesSource(descriptor)}}
+                {{GetEntityDtoAndDboGetter(descriptor)}}
                 """
             ).ToString()
         );

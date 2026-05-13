@@ -6,7 +6,7 @@ public interface IPamelloBasicEntity
 {
     public int Id { get; }
 
-    public PamelloBasicEntityDto GetDto();
+    public PamelloBasicDto GetDto();
 
     public bool IsDeleted { get; }
     public bool IsAvailable();

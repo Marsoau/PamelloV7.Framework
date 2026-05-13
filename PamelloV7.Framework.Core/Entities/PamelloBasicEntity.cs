@@ -7,7 +7,7 @@ public abstract class PamelloBasicEntity : IPamelloBasicEntity
 {
     public abstract int Id { get; }
     
-    public abstract PamelloBasicEntityDto GetDto();
+    public abstract PamelloBasicDto GetDto();
     
     public virtual bool IsDeleted => false;
     public virtual bool IsAvailable() => !IsDeleted;

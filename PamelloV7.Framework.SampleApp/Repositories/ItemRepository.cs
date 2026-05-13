@@ -10,6 +10,7 @@ public interface IItemRepository : IPamelloRepository<Item>
     public IEnumerable<Item> GetBySomeNumber(int number);
 
     public Item Add(int number);
+    public Item Add(Item item);
 }
 
 public class ItemRepository : PamelloRepository<Item>, IItemRepository
@@ -20,5 +21,6 @@ public class ItemRepository : PamelloRepository<Item>, IItemRepository
         return Available.Where(e => e.Number == number);
     }
 
+    public Item Add(Item item) => LoadPamelloEntity(item);
     public Item Add(int number) => LoadPamelloEntity(new Item(number));
 }

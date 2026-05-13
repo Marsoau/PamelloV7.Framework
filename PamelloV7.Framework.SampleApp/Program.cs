@@ -22,12 +22,6 @@ public class TestNode
     public ushort Port { get; set; } = 51630;
 }
 
-public class DatabaseItem
-{
-    public int Id { get; set; }
-    public string Message { get; set; } = "";
-}
-
 class Program
 {
     static async Task Main(string[] args) {
@@ -38,11 +32,11 @@ class Program
         await app.StartAsync();
 
         var items = app.Services.GetRequiredService<IItemRepository>();
+        
+        var database = app.Services.GetRequiredService<IDatabaseAccessService>();
+        var collection = database.GetCollection<Item.Dbo>("testitems");
 
-        items.Add(123);
-        items.Add(234);
-        items.Add(345);
-        items.Add(456);
+        items.Add(new Item(collection.Get(4)!));
         
         var anotherItems = app.Services.GetRequiredService<IPamelloRepository<Item>>();
 
