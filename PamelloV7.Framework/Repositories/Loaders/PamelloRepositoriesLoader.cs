@@ -45,7 +45,6 @@ public class PamelloRepositoriesLoader
             foreach (var interfaceType in repositoryType.GetInterfaces()) {
                 if (!interfaceType.IsAssignableTo(typeof(IPamelloRepository))) continue;
                 if (interfaceType == typeof(IPamelloRepository) ||
-                    interfaceType == typeof(IPamelloLazyDatabaseRepository) ||
                     interfaceType == typeof(IPamelloDatabaseRepository)
                 ) continue;
                 
@@ -56,13 +55,12 @@ public class PamelloRepositoriesLoader
         }
     }
     
-    public void LoadAndInitEntities(IServiceProvider services) {
+    public void LoadAllEntities(IServiceProvider services) {
         var repositories = RepositoriesDescriptors
             .Select(r => services.GetRequiredService(r.ClassType))
             .OfType<IPamelloDatabaseRepository>()
             .ToList();
 
         repositories.ForEach(repository => repository.LoadAll());
-        repositories.ForEach(repository => repository.InitAll());
     }
 }

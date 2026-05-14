@@ -7,4 +7,8 @@ namespace PamelloV7.Framework.Core.Entities;
 public abstract class PamelloBasicDatabaseEntity : PamelloBasicEntity, IPamelloDatabaseBasicEntity
 {
     public abstract PamelloBasicDbo GetDbo();
+
+    public virtual void Save() {
+        throw new NotImplementedException();
+    }
 }

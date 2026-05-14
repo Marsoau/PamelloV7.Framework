@@ -46,10 +46,6 @@ public class PamelloAppBuilder : IHostApplicationBuilder
             : Host.CreateApplicationBuilder(args);
     }
 
-    class SomeAAndBClass : InterfaceA, InterfaceB;
-    interface InterfaceA;
-    interface InterfaceB;
-
     public void Configure(Action<PamelloAppOptions>? editOptionsAfterConfig = null) {
         Services.AddSingleton(Options);
         
@@ -58,9 +54,6 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         Services.AddSingleton(RepositoriesLoader);
 
         Services.AddSingleton(Services);
-        
-        Services.AddSingleton<InterfaceA, SomeAAndBClass>();
-        Services.AddSingleton<InterfaceB, SomeAAndBClass>();
         
         ConfigLoader.Load();
         ConfigLoader.FinishBeforeModules();

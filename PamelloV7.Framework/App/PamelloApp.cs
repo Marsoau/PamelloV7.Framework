@@ -39,7 +39,7 @@ public partial class PamelloApp : IHost
     public Task StartAsync(CancellationToken cancellationToken = default) {
         var repositoriesLoader = Services.GetRequiredService<PamelloRepositoriesLoader>();
         
-        repositoriesLoader.LoadAndInitEntities(Services);
+        repositoriesLoader.LoadAllEntities(Services);
         
         if (_host is WebApplication asp && Options.UseApi) {
             StartupForApi(asp);
