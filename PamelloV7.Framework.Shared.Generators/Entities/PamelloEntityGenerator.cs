@@ -69,7 +69,7 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
             """;
     }
     
-    public static string WriteUpdatablePropertySetter(PamelloEntityUpdatablePropertyDescriptor propertyDescriptor) {
+    public static string WriteUpdatablePropertySetter(PamelloEntityDescriptor descriptor, PamelloEntityUpdatablePropertyDescriptor propertyDescriptor) {
         if (propertyDescriptor.Property.SetMethod is null) return "//no setter";
         
         return
@@ -77,13 +77,22 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
             {{(propertyDescriptor.Property.SetMethod.DeclaredAccessibility < propertyDescriptor.Property.DeclaredAccessibility
                 ? $"{SharedHelper.GetSymbolModifiers(propertyDescriptor.Property.SetMethod)} "
                 : ""
-            )}}set {
-                if ({{ToPrivateFieldName(propertyDescriptor.Property.Name)}} == value) return;
-                
-                {{ToPrivateFieldName(propertyDescriptor.Property.Name)}} = value;
-                
-                Save();
-            }
+            )}}
+
+            {{(descriptor.IsDatabaseEntity
+                ? $$$"""
+                set {
+                    if ({{{ToPrivateFieldName(propertyDescriptor.Property.Name)}}} == value) return;
+                    
+                    {{{ToPrivateFieldName(propertyDescriptor.Property.Name)}}} = value;
+                    
+                    Save();
+                }
+                """
+                : $$$"""
+                set => {{{ToPrivateFieldName(propertyDescriptor.Property.Name)}}} = value;
+                """
+            )}}
             """;
     }
     
@@ -106,7 +115,7 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
                     propertyDescriptor.Property.Name
                 }} {
                     {{WriteUpdatablePropertyGetter(propertyDescriptor)}}
-                    {{WriteUpdatablePropertySetter(propertyDescriptor)}}
+                    {{WriteUpdatablePropertySetter(descriptor, propertyDescriptor)}}
                 }
                 
                 """
