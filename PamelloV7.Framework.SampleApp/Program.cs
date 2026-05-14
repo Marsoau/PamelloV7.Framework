@@ -25,7 +25,9 @@ public class TestNode
 class Program
 {
     static async Task Main(string[] args) {
-        var app = PamelloApp.CreateBuilder(args, options => {
+        var app = PamelloApp.CreateBuilder(args, new PamelloAppOptions() {
+            Logger = new PamelloConsoleLogger(),
+        }, options => {
             options.ApiUrls.Add($"http://localhost:{TestConfig.Root.Port}");
         }).Build();
         
