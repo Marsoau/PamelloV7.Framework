@@ -1,20 +1,33 @@
+using Microsoft.Extensions.DependencyInjection;
+using PamelloV7.Framework.Core.Data;
 using PamelloV7.Framework.Core.Entities;
 using PamelloV7.Framework.Core.Entities.Dbo;
 using PamelloV7.Framework.Shared.Entities.Base;
 
 namespace PamelloV7.Framework.Core.Repositories;
 
-public abstract class PamelloDatabaseRepository<TPamelloEntity, TEntityData>
-    : PamelloLazyDatabaseRepository<TPamelloEntity, TEntityData>, IPamelloDatabaseRepository<TPamelloEntity>
+public abstract class PamelloDatabaseRepository<TPamelloEntity, TEntityDbo>
+    : PamelloRepository<TPamelloEntity>, IPamelloDatabaseRepository<TPamelloEntity>
     where TPamelloEntity : class, IPamelloBasicEntity
-    where TEntityData : PamelloBasicDbo
+    where TEntityDbo : PamelloBasicDbo
 {
-    public PamelloDatabaseRepository(IServiceProvider services) : base(services) { }
+    protected readonly IDatabaseAccessService Database;
     
-    public void LoadAll() {
+    public abstract string CollectionName { get; }
+
+    public PamelloDatabaseRepository(IServiceProvider services) : base(services) {
+        Database = services.GetRequiredService<IDatabaseAccessService>();
+    }
+
+    public virtual void LoadAll() {
         
     }
-    public void InitAll() {
-        
+    
+    public IDatabaseCollection<TEntityDbo> GetCollection() {
+        return Database.GetCollection<TEntityDbo>(CollectionName);
+    }
+
+    protected virtual TPamelloEntity LoadDatabaseEntity(TEntityDbo entity) {
+        return null;
     }
 }

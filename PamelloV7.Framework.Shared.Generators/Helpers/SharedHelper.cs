@@ -39,8 +39,7 @@ public static class SharedHelper
             typeSymbol.BaseType.Name != "Object" &&
             CheckTypeName(
                 typeSymbol.BaseType,
-                name,
-                false
+                name
             );
     }
     

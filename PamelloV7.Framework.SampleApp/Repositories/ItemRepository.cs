@@ -13,7 +13,7 @@ public interface IItemRepository : IPamelloRepository<Item>
     public Item Add(int number, string message);
 }
 
-[PamelloRepository<Item>("items")]
+[PamelloDatabaseRepository<Item>("items")]
 public partial class ItemRepository : IItemRepository
 {
     public IEnumerable<Item> GetBySomeNumber(int number) {

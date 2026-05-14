@@ -13,6 +13,9 @@ public class PamelloRepositoryGenerator : PamelloGenerator<PamelloRepositoryDesc
     private const string PamelloRepositoryAttributeName = "PamelloRepositoryAttribute";
     private const string PamelloRepositoryBaseTypeAttributeName = "PamelloRepositoryBaseTypeAttribute";
     
+    private const string PamelloRepositoryDatabaseRepositoryAttributeName = "PamelloDatabaseRepositoryAttribute";
+    private const string PamelloRepositoryLazyDatabaseRepositoryAttributeName = "PamelloLazyDatabaseRepositoryAttribute";
+    
     protected override bool Predicate(SyntaxNode node, CancellationToken cancellationToken)
         => node is ClassDeclarationSyntax;
 
@@ -26,6 +29,16 @@ public class PamelloRepositoryGenerator : PamelloGenerator<PamelloRepositoryDesc
         
         if (repositoryAttribute?.AttributeClass?.TypeArguments.FirstOrDefault() is not INamedTypeSymbol pamelloEntityType) return null;
         
+        var isDatabaseRepository = SharedHelper.CheckTypeName(repositoryAttribute.AttributeClass, PamelloRepositoryDatabaseRepositoryAttributeName);
+        var isLazy = SharedHelper.CheckTypeName(repositoryAttribute.AttributeClass, PamelloRepositoryLazyDatabaseRepositoryAttributeName);
+        
+        var providerName = repositoryAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+        var collectionName = repositoryAttribute.ConstructorArguments.ElementAtOrDefault(1).Value?.ToString();
+
+        if (isDatabaseRepository) collectionName ??= providerName;
+        
+        if (providerName is null) return null;
+        
         var baseTypeAttribute = repositoryAttribute.AttributeClass?.GetAttributes()
             .FirstOrDefault(a => SharedHelper.CheckTypeName(a.AttributeClass, PamelloRepositoryBaseTypeAttributeName));
 
@@ -35,10 +48,31 @@ public class PamelloRepositoryGenerator : PamelloGenerator<PamelloRepositoryDesc
 
         return new PamelloRepositoryDescriptor(
             targetType,
+            
+            providerName,
             repositoryBaseType,
             pamelloEntityType,
+            collectionName,
+            isLazy,
+            
             debugOutput
         );
+    }
+
+    private static string GetRepositoryInheritancePartSource(PamelloRepositoryDescriptor descriptor) {
+        var inheritancePartSb = new StringBuilder();
+
+        inheritancePartSb.Append($": {descriptor.RepositoryBaseType.GetFullName()}");
+
+        if (descriptor.IsDatabaseRepository) {
+            inheritancePartSb.Insert(inheritancePartSb.Length - 2, descriptor.PamelloEntityType.GetFullName());
+            inheritancePartSb.Insert(inheritancePartSb.Length - 1, $"{descriptor.PamelloEntityType.GetFullName()}.Dbo");
+        }
+        else {
+            inheritancePartSb.Insert(inheritancePartSb.Length - 1, descriptor.PamelloEntityType.GetFullName());
+        }
+        
+        return inheritancePartSb.ToString();
     }
 
     private static string GetRepositoryConstructorSource(PamelloRepositoryDescriptor descriptor) {
@@ -56,17 +90,22 @@ public class PamelloRepositoryGenerator : PamelloGenerator<PamelloRepositoryDesc
         }) {{ }}";
     }
 
+    private static string GetRepositoryCollectionPropertySource(PamelloRepositoryDescriptor descriptor) {
+        if (!descriptor.IsDatabaseRepository) return "//no collection property required for non-database repositories";
+        
+        return $"public override string CollectionName => \"{descriptor.CollectionName}\";";
+    }
+
     protected override void Generate(PamelloRepositoryDescriptor descriptor, StringBuilder generatorSb) {
-        var inheritancePartSb = new StringBuilder();
-
-        inheritancePartSb.Append($": {descriptor.RepositoryBaseType.GetFullName()}");
-        inheritancePartSb.Insert(inheritancePartSb.Length - 1, descriptor.PamelloEntityType.GetFullName());
-
+        descriptor.DebugOutput.AppendLine($"Is database repository: {descriptor.IsDatabaseRepository}");
+        descriptor.DebugOutput.AppendLine($"Is lazy: {descriptor.IsLazy}");
+        
         generatorSb.AppendLine(
             SharedHelper.WriteInsideType(
                 descriptor.InvokingType,
-                inheritancePartSb.ToString(),
+                GetRepositoryInheritancePartSource(descriptor),
                 $$"""
+                {{GetRepositoryCollectionPropertySource(descriptor)}}
                 {{GetRepositoryConstructorSource(descriptor)}}
                 """
             ).ToString()
