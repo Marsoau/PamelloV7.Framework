@@ -198,8 +198,7 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
                 {{(descriptor.NeedsIdGenerated
                     ? descriptor.IsDatabaseEntity
                         ? """
-                        private int _id = 0;
-                        public override int Id => _id;
+                        //no need to generate id for database entity
                         """
                         : """
                         private static int _idCounter = 0;

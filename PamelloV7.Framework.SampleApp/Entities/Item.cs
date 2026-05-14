@@ -16,10 +16,6 @@ public partial class Item
         Message = message;
     }
 
-    public override void Save() {
-        
-    }
-
     public override string ToString() {
         return $"[{Id}] {Number} \"{Message}\"";
     }

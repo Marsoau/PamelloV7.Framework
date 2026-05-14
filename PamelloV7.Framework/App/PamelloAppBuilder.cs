@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PamelloV7.Framework.Config.Loaders;
 using PamelloV7.Framework.Core.Config.Attributes;
+using PamelloV7.Framework.Core.Context;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.Modules.Loaders;
 using PamelloV7.Framework.Repositories.Loaders;
@@ -87,11 +88,17 @@ public class PamelloAppBuilder : IHostApplicationBuilder
             webBuilder.WebHost.UseUrls([..Options.ApiUrls]);
     }
 
-    public PamelloApp Build() => _builder switch {
-        WebApplicationBuilder webBuilder => new PamelloApp(webBuilder.Build(), Options),
-        HostApplicationBuilder hostBuilder => new PamelloApp(hostBuilder.Build(), Options),
-        _ => throw new InvalidOperationException("Unknown builder type")
-    };
+    public PamelloApp Build() {
+        var app = _builder switch {
+            WebApplicationBuilder webBuilder => new PamelloApp(webBuilder.Build(), Options),
+            HostApplicationBuilder hostBuilder => new PamelloApp(hostBuilder.Build(), Options),
+            _ => throw new InvalidOperationException("Unknown builder type")
+        };
+        
+        PamelloAppContext.Services = app.Services;
+        
+        return app;
+    }
 
     public void ConfigureContainer<TContainerBuilder>(IServiceProviderFactory<TContainerBuilder> factory, Action<TContainerBuilder>? configure = null)
         where TContainerBuilder : notnull

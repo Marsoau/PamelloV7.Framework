@@ -35,6 +35,8 @@ class Program
 
         var items = app.Services.GetRequiredService<IItemRepository>();
         
+        items.Add(333, "Third Item");
+        
         var database = app.Services.GetRequiredService<IDatabaseAccessService>();
         var collection = database.GetCollectionOfEntity(typeof(Item));
 
