@@ -10,11 +10,11 @@ namespace PamelloV7.Framework.Shared.Generators.Entities;
 [Generator]
 public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
 {
-    public static string PamelloBasicEntityAttributeName = "PamelloBasicEntityAttribute";
-    public static string PamelloBasicDatabaseEntityAttributeName = "PamelloBasicDatabaseEntityAttribute";
+    public const string PamelloBasicEntityAttributeName = "PamelloBasicEntityAttribute";
+    public const string PamelloBasicDatabaseEntityAttributeName = "PamelloBasicDatabaseEntityAttribute";
     
-    public static string PamelloDtoClassFullName = "global::PamelloV7.Framework.Shared.Entities.Dto.PamelloBasicDto";
-    public static string PamelloDboClassFullName = "global::PamelloV7.Framework.Core.Entities.Dbo.PamelloBasicDbo";
+    public const string PamelloDtoClassFullName = "global::PamelloV7.Framework.Shared.Entities.Dto.PamelloBasicDto";
+    public const string PamelloDboClassFullName = "global::PamelloV7.Framework.Core.Entities.Dbo.PamelloBasicDbo";
     
     protected override bool Predicate(SyntaxNode node, CancellationToken cancellationToken)
         => node is ClassDeclarationSyntax { AttributeLists.Count: > 0 };

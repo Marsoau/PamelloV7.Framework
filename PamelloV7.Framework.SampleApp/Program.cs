@@ -37,7 +37,7 @@ class Program
         var collection = database.GetCollection<Item.Dbo>("testitems");
 
         items.Add(13, "test");
-        items.Add(13, "test");
+        items.Add(26, "another test");
         
         var anotherItems = app.Services.GetRequiredService<IPamelloRepository<Item>>();
 

@@ -1,5 +1,6 @@
 using PamelloV7.Framework.Core.Entities;
 using PamelloV7.Framework.Core.Repositories;
+using PamelloV7.Framework.Core.Repositories.Attributes;
 using PamelloV7.Framework.SampleApp.Entities;
 using PamelloV7.Framework.Shared.Entities.Base;
 
@@ -12,10 +13,9 @@ public interface IItemRepository : IPamelloRepository<Item>
     public Item Add(int number, string message);
 }
 
-public class ItemRepository : PamelloRepository<Item>, IItemRepository
+[PamelloRepository<Item>("items")]
+public partial class ItemRepository : IItemRepository
 {
-    public ItemRepository(IServiceProvider services) : base(services) { }
-
     public IEnumerable<Item> GetBySomeNumber(int number) {
         return Available.Where(e => e.Number == number);
     }
