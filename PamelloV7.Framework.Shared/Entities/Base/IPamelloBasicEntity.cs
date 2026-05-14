@@ -10,4 +10,6 @@ public interface IPamelloBasicEntity
 
     public bool IsDeleted { get; }
     public bool IsAvailable();
+    
+    public void Delete();
 }
