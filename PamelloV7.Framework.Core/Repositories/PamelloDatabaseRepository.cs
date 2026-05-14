@@ -22,7 +22,10 @@ public abstract class PamelloDatabaseRepository<TPamelloEntity, TEntityDbo>
     public virtual void LoadAll() {
         
     }
-    
+
+    IDatabaseCollection<PamelloBasicDbo> IPamelloDatabaseRepository.GetCollection() {
+        return Database.GetCollection<PamelloBasicDbo>(CollectionName);
+    }
     public IDatabaseCollection<TEntityDbo> GetCollection() {
         return Database.GetCollection<TEntityDbo>(CollectionName);
     }

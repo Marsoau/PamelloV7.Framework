@@ -6,7 +6,7 @@ using PamelloV7.Framework.Shared.Entities.Base;
 
 namespace PamelloV7.Framework.SampleApp.Repositories;
 
-public interface IItemRepository : IPamelloRepository<Item>
+public interface IItemRepository : IPamelloDatabaseRepository<Item>
 {
     public IEnumerable<Item> GetBySomeNumber(int number);
 

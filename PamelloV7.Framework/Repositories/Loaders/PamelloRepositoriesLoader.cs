@@ -1,16 +1,25 @@
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using PamelloV7.Framework.App;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.Repositories;
+using PamelloV7.Framework.Core.Repositories.Attributes;
 
 namespace PamelloV7.Framework.Repositories.Loaders;
 
 public record PamelloRepositoryDescriptor(
-    string ProviderName,
-    Type ClassType,
+    IPamelloRepositoryAttribute Attribute,
+    Type RepositoryType,
     List<Type> Interfaces,
     List<Type> GenericInterfaces
-);
+)
+{
+    public bool IsDatabaseRepository => DatabaseAttribute is not null;
+    public IPamelloDatabaseRepositoryAttribute? DatabaseAttribute => Attribute as IPamelloDatabaseRepositoryAttribute;
+
+    public Type? EntityDboType => Attribute.EntityType.GetNestedType("Dbo");
+    public Type? EntityDtoType => Attribute.EntityType.GetNestedType("Dto");
+};
 
 public class PamelloRepositoriesLoader
 {
@@ -28,8 +37,14 @@ public class PamelloRepositoriesLoader
             .Where(t => t is { IsClass: true, IsAbstract: false } && t.IsAssignableTo(typeof(IPamelloRepository)));
 
         foreach (var repositoryType in repositoriesTypes) {
+            var repositoryAttribute = repositoryType.GetCustomAttributes()
+                .OfType<IPamelloRepositoryAttribute>()
+                .FirstOrDefault();
+            
+            if (repositoryAttribute is null) continue;
+            
             RepositoriesDescriptors.Add(new PamelloRepositoryDescriptor(
-                "",
+                repositoryAttribute,
                 repositoryType,
                 [],
                 []
@@ -38,7 +53,7 @@ public class PamelloRepositoriesLoader
     }
 
     public void Configure(IServiceCollection collection) {
-        foreach (var repositoryType in RepositoriesDescriptors.Select(r => r.ClassType)) {
+        foreach (var repositoryType in RepositoriesDescriptors.Select(r => r.RepositoryType)) {
             collection.AddSingleton(repositoryType);
 
             PamelloOutput.Write($"Adding {repositoryType.Name}");
@@ -57,7 +72,7 @@ public class PamelloRepositoriesLoader
     
     public void LoadAllEntities(IServiceProvider services) {
         var repositories = RepositoriesDescriptors
-            .Select(r => services.GetRequiredService(r.ClassType))
+            .Select(r => services.GetRequiredService(r.RepositoryType))
             .OfType<IPamelloDatabaseRepository>()
             .ToList();
 

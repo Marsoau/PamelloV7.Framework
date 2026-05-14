@@ -34,14 +34,11 @@ class Program
         var items = app.Services.GetRequiredService<IItemRepository>();
         
         var database = app.Services.GetRequiredService<IDatabaseAccessService>();
-        var collection = database.GetCollection<Item.Dbo>("testitems");
+        var collection = database.GetCollectionOfEntity(typeof(Item));
 
-        items.Add(13, "test");
-        items.Add(26, "another test");
-        
-        var anotherItems = app.Services.GetRequiredService<IPamelloRepository<Item>>();
+        Console.WriteLine($"Collection: {collection?.Count()}");
 
-        foreach (var item in anotherItems.GetAll()) {
+        foreach (var item in items.GetAll()) {
             Console.WriteLine($"| {item}");
         }
 

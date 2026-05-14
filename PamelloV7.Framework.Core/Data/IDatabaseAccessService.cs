@@ -1,3 +1,4 @@
+using PamelloV7.Framework.Core.Entities.Dbo;
 using PamelloV7.Framework.Core.Services.Base;
 
 namespace PamelloV7.Framework.Core.Data;
@@ -5,4 +6,5 @@ namespace PamelloV7.Framework.Core.Data;
 public interface IDatabaseAccessService : IPamelloService
 {
     public IDatabaseCollection<TType> GetCollection<TType>(string name);
+    public IDatabaseCollection<PamelloBasicDbo>? GetCollectionOfEntity(Type entityType);
 }
