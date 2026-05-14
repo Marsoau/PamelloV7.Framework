@@ -39,14 +39,14 @@ public static class PamelloAppOptionsExtensions
         #if DEBUG
             options.DebugDataPath;
         #else
-            ReleaseDataPath;
+            options.ReleaseDataPath;
         #endif
 
         public string ConfigPath =>
         #if DEBUG
             options.DebugConfigPath;
         #else
-            ReleaseConfigPath;
+            options.ReleaseConfigPath;
         #endif
     }
 }
