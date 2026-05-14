@@ -35,6 +35,8 @@ class Program
 
         var items = app.Services.GetRequiredService<IItemRepository>();
         
+        var oneItem = items.Get(1);
+        
         foreach (var item in items.GetAll()) {
             Console.WriteLine($"| {item}");
         }

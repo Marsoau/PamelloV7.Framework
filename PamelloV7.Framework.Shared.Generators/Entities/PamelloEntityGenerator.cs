@@ -63,7 +63,7 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
         return
             $"""
             {(propertyDescriptor.Property.GetMethod.DeclaredAccessibility < propertyDescriptor.Property.DeclaredAccessibility
-                ? SharedHelper.GetSymbolModifiers(propertyDescriptor.Property.GetMethod)
+                ? $"{SharedHelper.GetSymbolModifiers(propertyDescriptor.Property.GetMethod)} "
                 : ""
             )} get => {ToPrivateFieldName(propertyDescriptor.Property.Name)};
             """;
@@ -73,11 +73,17 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
         if (propertyDescriptor.Property.SetMethod is null) return "//no setter";
         
         return
-            $"""
-            {(propertyDescriptor.Property.SetMethod.DeclaredAccessibility < propertyDescriptor.Property.DeclaredAccessibility
-                ? SharedHelper.GetSymbolModifiers(propertyDescriptor.Property.SetMethod)
+            $$"""
+            {{(propertyDescriptor.Property.SetMethod.DeclaredAccessibility < propertyDescriptor.Property.DeclaredAccessibility
+                ? $"{SharedHelper.GetSymbolModifiers(propertyDescriptor.Property.SetMethod)} "
                 : ""
-            )} set => {ToPrivateFieldName(propertyDescriptor.Property.Name)} = value;
+            )}}set {
+                if ({{ToPrivateFieldName(propertyDescriptor.Property.Name)}} == value) return;
+                
+                {{ToPrivateFieldName(propertyDescriptor.Property.Name)}} = value;
+                
+                Save();
+            }
             """;
     }
     

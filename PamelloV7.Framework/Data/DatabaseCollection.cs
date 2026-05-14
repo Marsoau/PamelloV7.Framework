@@ -25,11 +25,11 @@ public class DatabaseCollection<TDatabaseEntity> : IDatabaseCollection<TDatabase
     }
 
     public void Add(TDatabaseEntity entity) {
-        _collection.Upsert(entity);
+        _collection.Insert(entity);
     }
 
     public void Save(TDatabaseEntity entity) {
-        _collection.Update(entity);
+        _collection.Upsert(entity);
     }
 
     public void Delete(object key) {

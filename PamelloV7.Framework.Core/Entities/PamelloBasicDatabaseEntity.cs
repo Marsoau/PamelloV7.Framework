@@ -15,12 +15,13 @@ public abstract class PamelloBasicDatabaseEntity : PamelloBasicEntity, IPamelloD
     public abstract PamelloBasicDbo GetDbo();
 
     public virtual void Save() {
-        var database = PamelloAppContext.Services.GetRequiredService<IDatabaseAccessService>();
-        var collection = database.GetCollectionOfEntity(GetType());
+        var database = PamelloAppContext.Services.GetService<IDatabaseAccessService>();
+        var collection = database?.GetCollectionOfEntity(GetType());
+        if (collection is null) return;
         
         var dbo = GetDbo();
         
-        collection?.Add(dbo);
+        collection.Save(dbo);
         
         _id = dbo.Id;
     }
