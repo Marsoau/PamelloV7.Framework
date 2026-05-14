@@ -36,7 +36,8 @@ class Program
         var database = app.Services.GetRequiredService<IDatabaseAccessService>();
         var collection = database.GetCollection<Item.Dbo>("testitems");
 
-        items.Add(new Item(collection.Get(4)!));
+        items.Add(13, "test");
+        items.Add(13, "test");
         
         var anotherItems = app.Services.GetRequiredService<IPamelloRepository<Item>>();
 

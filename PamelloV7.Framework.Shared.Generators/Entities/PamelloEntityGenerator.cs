@@ -11,6 +11,7 @@ namespace PamelloV7.Framework.Shared.Generators.Entities;
 public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
 {
     public static string PamelloBasicEntityAttributeName = "PamelloBasicEntityAttribute";
+    public static string PamelloBasicDatabaseEntityAttributeName = "PamelloBasicDatabaseEntityAttribute";
     
     public static string PamelloDtoClassFullName = "global::PamelloV7.Framework.Shared.Entities.Dto.PamelloBasicDto";
     public static string PamelloDboClassFullName = "global::PamelloV7.Framework.Core.Entities.Dbo.PamelloBasicDbo";
@@ -25,6 +26,10 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
     ) {
         var attribute = targetType.GetAttributes()
             .FirstOrDefault(a => SharedHelper.CheckTypeName(a.AttributeClass, PamelloBasicEntityAttributeName));
+
+        var isDatabaseEntity = SharedHelper.CheckTypeName(attribute?.AttributeClass, PamelloBasicDatabaseEntityAttributeName);
+        
+        debugOutput.AppendLine($"Is database entity: {isDatabaseEntity}");
         
         if (attribute is null) return null;
         
@@ -46,6 +51,7 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
         return new PamelloEntityDescriptor(
             targetType,
             !hasIdProperty,
+            isDatabaseEntity,
             updatableProperties,
             debugOutput
         );
@@ -125,6 +131,11 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
         dtoClassSb.AppendLine("}");
         dboClassSb.AppendLine("}");
         
+        if (!descriptor.IsDatabaseEntity) {
+            dboClassSb.Clear();
+            dboClassSb.AppendLine($"//no dbo class required");
+        }
+        
         return $"{dtoClassSb}\n{dboClassSb}";
     }
 
@@ -133,7 +144,7 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
         var dboGetterSb = new StringBuilder();
 
         dtoGetterSb.AppendLine($"public override Dto GetDto() => new Dto() {{");
-        dboGetterSb.AppendLine($"public Dbo GetDbo() => new Dbo() {{");
+        dboGetterSb.AppendLine($"public override Dbo GetDbo() => new Dbo() {{");
         
         dtoGetterSb.AppendLine(string.Join(",\n", descriptor.UpdatableProperties
             .Select(p => p.Property.Name)
@@ -153,10 +164,16 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
         dtoGetterSb.AppendLine("};");
         dboGetterSb.AppendLine("};");
 
+        if (!descriptor.IsDatabaseEntity) {
+            dboGetterSb.Clear();
+            dboGetterSb.AppendLine($"//no dbo getter required");
+        }
+        
         return $"{dtoGetterSb}\n{dboGetterSb}";
     }
 
     public static string GetEntityDboConstructor(PamelloEntityDescriptor descriptor) {
+        if (!descriptor.IsDatabaseEntity) return "//no dbo constructor required";
         var sb = new StringBuilder();
         
         sb.AppendLine($"public {descriptor.InvokingType.Name}(Dbo dbo) : base() {{");
@@ -178,13 +195,20 @@ public class PamelloEntityGenerator : PamelloGenerator<PamelloEntityDescriptor>
                 descriptor.InvokingType,
                 "",
                 $$"""
-                {{(descriptor.NeedsIdGenerated ? """
-                private static int _idCounter = 0;
-                
-                private int _id = ++_idCounter;
-                public override int Id => _id;
-                
-                """ : "")}}
+                {{(descriptor.NeedsIdGenerated
+                    ? descriptor.IsDatabaseEntity
+                        ? """
+                        private int _id = 0;
+                        public override int Id => _id;
+                        """
+                        : """
+                        private static int _idCounter = 0;
+
+                        private int _id = ++_idCounter;
+                        public override int Id => _id;
+                        """
+                    : ""
+                )}}
                 
                 {{GetEntityDboConstructor(descriptor)}}
                 

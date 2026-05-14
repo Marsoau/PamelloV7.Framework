@@ -11,6 +11,7 @@ public record PamelloEntityUpdatablePropertyDescriptor(
 public record PamelloEntityDescriptor(
     INamedTypeSymbol InvokingType,
     bool NeedsIdGenerated,
+    bool IsDatabaseEntity,
     List<PamelloEntityUpdatablePropertyDescriptor> UpdatableProperties,
     StringBuilder DebugOutput
 ) : PamelloDescriptor(

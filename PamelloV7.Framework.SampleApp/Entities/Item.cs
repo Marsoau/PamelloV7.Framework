@@ -5,14 +5,15 @@ using PamelloV7.Framework.Shared.Entities.Dto;
 
 namespace PamelloV7.Framework.SampleApp.Entities;
 
-[PamelloBasicEntity]
+[PamelloBasicDatabaseEntity]
 public partial class Item
 {
     public partial int Number { get; set; }
     public partial string Message { get; set; }
-    
-    public Item(int number) {
-        _number = number;
+
+    public Item(int number, string message) {
+        Number = number;
+        Message = message;
     }
 
     public override string ToString() {
