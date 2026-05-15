@@ -5,6 +5,7 @@ namespace PamelloV7.Framework.Core.Repositories;
 
 public interface IPamelloRepository
 {
+    public void DeleteAll();
     public IEnumerable<IPamelloBasicEntity> GetAll();
     public IPamelloBasicEntity? Get(int id);
 }

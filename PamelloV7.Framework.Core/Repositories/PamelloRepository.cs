@@ -17,6 +17,16 @@ public abstract class PamelloRepository<TPamelloEntity> : IPamelloRepository<TPa
 
     public virtual IEnumerable<TPamelloEntity> GetAll() => Available;
 
+    public void DeleteAll() {
+        var loaded = Loaded.ToList();
+        
+        Loaded.Clear();
+        
+        foreach (var entity in loaded) {
+            entity.Delete();
+        }
+    }
+
     public virtual TPamelloEntity? Get(int id)
         => Available.FirstOrDefault(e => e.Id == id);
 
