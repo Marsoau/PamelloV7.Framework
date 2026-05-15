@@ -66,7 +66,7 @@ public class PamelloRepositoryGenerator : PamelloGenerator<PamelloRepositoryDesc
 
         if (descriptor.IsDatabaseRepository) {
             inheritancePartSb.Insert(inheritancePartSb.Length - 2, descriptor.PamelloEntityType.GetFullName());
-            inheritancePartSb.Insert(inheritancePartSb.Length - 1, $"{descriptor.PamelloEntityType.GetFullName()}.Dbo");
+            inheritancePartSb.Insert(inheritancePartSb.Length - 1, $"{descriptor.PamelloEntityType.GetFullName()}.Dao");
         }
         else {
             inheritancePartSb.Insert(inheritancePartSb.Length - 1, descriptor.PamelloEntityType.GetFullName());

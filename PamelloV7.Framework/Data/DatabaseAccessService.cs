@@ -2,7 +2,7 @@ using LiteDB;
 using Microsoft.Extensions.DependencyInjection;
 using PamelloV7.Framework.App;
 using PamelloV7.Framework.Core.Data;
-using PamelloV7.Framework.Core.Entities.Dbo;
+using PamelloV7.Framework.Core.Entities.Dao;
 using PamelloV7.Framework.Core.Exceptions;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Repositories.Loaders;
@@ -41,7 +41,7 @@ public class DatabaseAccessService : IDatabaseAccessService
         return new DatabaseCollection<TType>(collection);
     }
     
-    public IDatabaseCollection<PamelloBasicDbo>? GetCollectionOfEntity(Type entityType) {
+    public IDatabaseCollection<PamelloBasicDao>? GetCollectionOfEntity(Type entityType) {
         var repositoryDescriptor = _repositoriesLoader.RepositoriesDescriptors
             .FirstOrDefault(repo =>
                 repo.Attribute.EntityType == entityType && repo.IsDatabaseRepository

@@ -17,7 +17,7 @@ public record PamelloRepositoryDescriptor(
     public bool IsDatabaseRepository => DatabaseAttribute is not null;
     public IPamelloDatabaseRepositoryAttribute? DatabaseAttribute => Attribute as IPamelloDatabaseRepositoryAttribute;
 
-    public Type? EntityDboType => Attribute.EntityType.GetNestedType("Dbo");
+    public Type? EntityDaoType => Attribute.EntityType.GetNestedType("Dao");
     public Type? EntityDtoType => Attribute.EntityType.GetNestedType("Dto");
 };
 

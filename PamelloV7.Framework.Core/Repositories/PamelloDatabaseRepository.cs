@@ -2,16 +2,16 @@ using Microsoft.Extensions.DependencyInjection;
 using PamelloV7.Framework.Core.Data;
 using PamelloV7.Framework.Core.Entities;
 using PamelloV7.Framework.Core.Entities.Base;
-using PamelloV7.Framework.Core.Entities.Dbo;
+using PamelloV7.Framework.Core.Entities.Dao;
 using PamelloV7.Framework.Core.Exceptions;
 using PamelloV7.Framework.Shared.Entities.Base;
 
 namespace PamelloV7.Framework.Core.Repositories;
 
-public abstract class PamelloDatabaseRepository<TPamelloEntity, TEntityDbo>
+public abstract class PamelloDatabaseRepository<TPamelloEntity, TEntityDao>
     : PamelloRepository<TPamelloEntity>, IPamelloDatabaseRepository<TPamelloEntity>
     where TPamelloEntity : class, IPamelloDatabaseBasicEntity
-    where TEntityDbo : PamelloBasicDbo
+    where TEntityDao : PamelloBasicDao
 {
     protected readonly IDatabaseAccessService Database;
     
@@ -25,18 +25,18 @@ public abstract class PamelloDatabaseRepository<TPamelloEntity, TEntityDbo>
         _ = GetCollection().GetAll().Select(LoadDatabaseEntity).ToList();
     }
 
-    IDatabaseCollection<PamelloBasicDbo> IPamelloDatabaseRepository.GetCollection() {
-        return Database.GetCollection<PamelloBasicDbo>(CollectionName);
+    IDatabaseCollection<PamelloBasicDao> IPamelloDatabaseRepository.GetCollection() {
+        return Database.GetCollection<PamelloBasicDao>(CollectionName);
     }
-    public IDatabaseCollection<TEntityDbo> GetCollection() {
-        return Database.GetCollection<TEntityDbo>(CollectionName);
+    public IDatabaseCollection<TEntityDao> GetCollection() {
+        return Database.GetCollection<TEntityDao>(CollectionName);
     }
 
-    protected virtual TPamelloEntity LoadDatabaseEntity(TEntityDbo dbo) {
-        var constructor = typeof(TPamelloEntity).GetConstructor([typeof(TEntityDbo)]);
-        if (constructor is null) throw new PamelloDatabaseException($"Entity {typeof(TPamelloEntity).Name} must have constructor with single parameter of type {typeof(TEntityDbo).Name}");
+    protected virtual TPamelloEntity LoadDatabaseEntity(TEntityDao dao) {
+        var constructor = typeof(TPamelloEntity).GetConstructor([typeof(TEntityDao)]);
+        if (constructor is null) throw new PamelloDatabaseException($"Entity {typeof(TPamelloEntity).Name} must have constructor with single parameter of type {typeof(TEntityDao).Name}");
         
-        return base.LoadPamelloEntity((TPamelloEntity)constructor.Invoke([dbo]));
+        return base.LoadPamelloEntity((TPamelloEntity)constructor.Invoke([dao]));
     }
     protected override TPamelloEntity LoadPamelloEntity(TPamelloEntity entity) {
         entity.Save();
