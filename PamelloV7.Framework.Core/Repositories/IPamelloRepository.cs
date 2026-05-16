@@ -5,9 +5,9 @@ namespace PamelloV7.Framework.Core.Repositories;
 
 public interface IPamelloRepository
 {
-    public void DeleteAll();
-    public IEnumerable<IPamelloBasicEntity> GetAll();
     public IPamelloBasicEntity? Get(int id);
+    public IEnumerable<IPamelloBasicEntity> GetAll();
+    public void DeleteAll();
 }
 
 public interface IPamelloRepository<TEntity> : IPamelloRepository
@@ -22,23 +22,20 @@ public interface IPamelloRepository<TEntity> : IPamelloRepository
 
 public static class PamelloRepositoryExtensions
 {
-    extension(IPamelloRepository repository)
-    {
-        public IPamelloBasicEntity GetRequired(int id)
-            => repository.Get(id) ?? throw new PamelloDatabaseException($"Entity with id {id} not found");
-        public IPamelloBasicEntity GetRequired(int id, Type type)
-            => repository.Get(id, type) ?? throw new PamelloDatabaseException($"Entity with id {id} not found");
-        public TEntity GetRequired<TEntity>(int id)
-            where TEntity : class, IPamelloBasicEntity
-            => repository.Get<TEntity>(id) ?? throw new PamelloDatabaseException($"Entity with id {id} not found");
-        
-        public IPamelloBasicEntity? Get(int id, Type type)
-            => repository.Get(id) is { } entity && entity.GetType() == type ? entity : null;
-        public TEntity? Get<TEntity>(int id) where TEntity : class, IPamelloBasicEntity
-            => repository.Get(id) as TEntity;
-        
-        public IEnumerable<TEntity> GetAll<TEntity>()
-            where TEntity : class, IPamelloBasicEntity
-            => repository.GetAll().OfType<TEntity>();
-    }
+    public static IPamelloBasicEntity GetRequired(this IPamelloRepository repository, int id)
+        => repository.Get(id) ?? throw new PamelloDatabaseException($"Entity with id {id} not found");
+    public static IPamelloBasicEntity GetRequired(this IPamelloRepository repository, int id, Type type)
+        => repository.Get(id, type) ?? throw new PamelloDatabaseException($"Entity with id {id} not found");
+    public static TEntity GetRequired<TEntity>(this IPamelloRepository<TEntity> repository, int id)
+        where TEntity : class, IPamelloBasicEntity
+        => repository.Get(id, typeof(TEntity)) as TEntity ?? throw new PamelloDatabaseException($"Entity with id {id} not found");
+
+    public static IPamelloBasicEntity? Get(this IPamelloRepository repository, int id, Type type)
+        => repository.Get(id) is { } entity && entity.GetType() == type ? entity : null;
+    public static TEntity? Get<TEntity>(this IPamelloRepository repository, int id) where TEntity : class, IPamelloBasicEntity
+        => repository.Get(id) as TEntity;
+
+    public static IEnumerable<TEntity> GetAll<TEntity>(this IPamelloRepository repository)
+        where TEntity : class, IPamelloBasicEntity
+        => repository.GetAll().OfType<TEntity>();
 }

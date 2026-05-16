@@ -33,8 +33,9 @@ class Program
         
         await app.StartAsync();
 
-        var items = app.Services.GetRequiredService<IItemRepository>();
+        var items = app.Services.GetRequiredService<ItemRepository>();
 
+        var oneItem = items.GetRequired(1);
         //items.Get(5)?.Delete();
         items.Add(0, "New item 4");
         
