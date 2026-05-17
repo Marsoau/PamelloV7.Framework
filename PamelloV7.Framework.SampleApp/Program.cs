@@ -25,21 +25,29 @@ public class TestNode
 class Program
 {
     static async Task Main(string[] args) {
-        var app = PamelloApp.CreateBuilder(args, new PamelloAppOptions() {
-            Logger = new PamelloConsoleLogger(),
-        }, options => {
-            options.ApiUrls.Add($"http://localhost:{TestConfig.Root.Port}");
-        }).Build();
+        var builder = PamelloApp.CreateBuilder(
+            args, new PamelloAppOptions() {
+                Logger = new PamelloConsoleLogger(),
+            }, options => {
+                options.ApiUrls.Add($"http://localhost:{TestConfig.Root.Port}");
+            }
+        );
+        
+        builder.RepositoriesLoader.RegisterToDrop(typeof(ItemRepository));
+        
+        var app = builder.Build();
         
         await app.StartAsync();
 
         var items = app.Services.GetRequiredService<ItemRepository>();
 
-        var oneItem = items.GetRequired(1);
-        //items.Get(5)?.Delete();
-        items.Add(0, "New item 4");
+        //var oneItem = items.GetRequired(1);
+        //Console.WriteLine($"> {oneItem.Message}");
         
-        foreach (var item in items.GetAll()) {
+        var allItems = items.GetAll().ToList();
+        
+        Console.WriteLine($"Items: {allItems.Count}");
+        foreach (var item in allItems) {
             Console.WriteLine($"| {item}");
         }
 

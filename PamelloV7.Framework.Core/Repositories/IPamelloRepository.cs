@@ -31,7 +31,7 @@ public static class PamelloRepositoryExtensions
         => repository.Get(id, typeof(TEntity)) as TEntity ?? throw new PamelloDatabaseException($"Entity with id {id} not found");
 
     public static IPamelloBasicEntity? Get(this IPamelloRepository repository, int id, Type type)
-        => repository.Get(id) is { } entity && entity.GetType() == type ? entity : null;
+        => repository.Get(id) is { } entity && entity.GetType().IsAssignableTo(type) ? entity : null;
     public static TEntity? Get<TEntity>(this IPamelloRepository repository, int id) where TEntity : class, IPamelloBasicEntity
         => repository.Get(id) as TEntity;
 

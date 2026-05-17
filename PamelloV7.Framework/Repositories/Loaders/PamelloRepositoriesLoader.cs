@@ -25,6 +25,7 @@ public class PamelloRepositoriesLoader
 {
     private readonly PamelloAppOptions _options;
 
+    public readonly List<Type> RepositoriesTypesToDrop = [];
     public readonly List<PamelloRepositoryDescriptor> RepositoriesDescriptors = [];
     
     public PamelloRepositoriesLoader(PamelloAppOptions options) {
@@ -69,12 +70,25 @@ public class PamelloRepositoriesLoader
             }
         }
     }
+
+    public void RegisterToDrop(Type repositoryType) {
+        if (RepositoriesTypesToDrop.Contains(repositoryType)) return;
+        
+        RepositoriesTypesToDrop.Add(repositoryType);
+    }
     
     public void LoadAllEntities(IServiceProvider services) {
         var repositories = RepositoriesDescriptors
             .Select(r => services.GetRequiredService(r.RepositoryType))
             .OfType<IPamelloDatabaseRepository>()
             .ToList();
+
+        var repositoriesToDrop = RepositoriesTypesToDrop.Select(services.GetServices).SelectMany(s => s).OfType<IPamelloDatabaseRepository>().ToList();
+        
+        foreach (var repository in repositoriesToDrop) {
+            var collection = repository.GetCollection();
+            collection.Drop();
+        }
 
         repositories.ForEach(repository => repository.LoadAll());
     }
