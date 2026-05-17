@@ -7,6 +7,7 @@ using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.PEQL;
 using PamelloV7.Framework.Repositories.Loaders;
+using PamelloV7.Framework.Shared.Entities.Containers;
 using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.App;
@@ -45,6 +46,7 @@ public partial class PamelloApp : IHost
         repositoriesLoader.LoadAllEntities(Services);
         
         entityQueryService.Startup(Services);
+        SafeContainerGetters.GetById = (type, id) => entityQueryService.GetSingleById(type, id);
         
         if (_host is WebApplication asp && Options.UseApi) {
             StartupForApi(asp);

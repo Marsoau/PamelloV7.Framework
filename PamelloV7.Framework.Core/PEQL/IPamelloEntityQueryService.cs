@@ -50,7 +50,8 @@ public static class PamelloEntityQueryServiceExtensions
     public static Task<IEnumerable<IPamelloBasicEntity>> GetAsync(string query) => throw new NotImplementedException();
     public static Task<IEnumerable<IPamelloBasicEntity>> GetAsync(Type entityType, string query) => throw new NotImplementedException();
     
-    public static IPamelloBasicEntity GetSingleById(Type entityType, int id) => throw new NotImplementedException();
+    public static IPamelloBasicEntity? GetSingleById(this IPamelloEntityQueryService queries, Type entityType, int id)
+        => RunGenericMethod(typeof(PamelloEntityQueryServiceExtensions), null, nameof(GetSingleByIdRequired), [entityType], [queries, id]) as IPamelloBasicEntity;
 
     public static IEnumerable<IPamelloBasicEntity> GetByIds(Type entityType, params int[] ids) => throw new NotImplementedException();
 }

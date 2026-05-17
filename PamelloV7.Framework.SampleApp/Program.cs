@@ -12,6 +12,7 @@ using PamelloV7.Framework.SampleApp.Entities;
 using PamelloV7.Framework.SampleApp.Repositories;
 using PamelloV7.Framework.SampleApp.Services;
 using PamelloV7.Framework.Shared.Attributes;
+using PamelloV7.Framework.Shared.Entities.Containers;
 using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.SampleApp;
@@ -41,9 +42,9 @@ class Program
         var queries = app.Services.GetRequiredService<IPamelloEntityQueryService>();
 
         var allItems = items.GetAll().ToList();
-        
-        var clap = queries.GetSingleByIdRequired(typeof(Item), 1);
-        Console.WriteLine($"Clap: {clap}");
+
+        var clapContainer = new Safe<Item>(1);
+        Console.WriteLine($"Clap: {clapContainer.Entity}");
         
         Console.WriteLine($"Items: {allItems.Count}");
         foreach (var item in allItems) {
