@@ -39,7 +39,21 @@ public class PamelloServiceLoader : IPamelloServiceLoader
             }
         }
     }
-    public void StartAppServices() {
-        
+    public void StartupServices(IServiceProvider services) {
+        var typesWithStartup = AppServiceTypes.Where(t => {
+            var type = t;
+            while (type is not null && type != typeof(object) && type != typeof(IPamelloService)) {
+                if (type.GetMethod("Startup") is not null) return true;
+                type = type.BaseType;
+            }
+            
+            return false;
+        });
+
+        PamelloOutput.Write("Starting services:");
+        foreach (var type in typesWithStartup) {
+            PamelloOutput.Write($"| {type.Name}");
+            type.GetMethod("Startup")?.Invoke(services.GetRequiredService(type), [services]);
+        }
     }
 }

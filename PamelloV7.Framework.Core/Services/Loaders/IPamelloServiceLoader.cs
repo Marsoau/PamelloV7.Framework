@@ -6,5 +6,5 @@ public interface IPamelloServiceLoader
 {
     public void LoadAppServices();
     public void ConfigureAppServices(IServiceCollection collection);
-    public void StartAppServices();
+    public void StartupServices(IServiceProvider services);
 }

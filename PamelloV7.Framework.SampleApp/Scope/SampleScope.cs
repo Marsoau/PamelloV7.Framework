@@ -1,5 +1,3 @@
-using PamelloV7.Framework.Core.Exceptions;
-using PamelloV7.Framework.Core.Scope;
 using PamelloV7.Framework.Core.Scope.Attributes;
 using PamelloV7.Framework.SampleApp.Entities;
 
