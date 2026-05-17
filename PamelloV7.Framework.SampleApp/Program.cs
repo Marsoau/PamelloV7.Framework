@@ -12,6 +12,7 @@ using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
 using PamelloV7.Framework.SampleApp.Entities;
 using PamelloV7.Framework.SampleApp.Repositories;
+using PamelloV7.Framework.SampleApp.Scope;
 using PamelloV7.Framework.SampleApp.Services;
 using PamelloV7.Framework.Shared.Attributes;
 using PamelloV7.Framework.Shared.Entities.Containers;
@@ -51,7 +52,7 @@ class Program
         var user2 = new User("Pivo");
         
         PamelloAppScope.SetUserIn(user1, () => {
-            Console.WriteLine($"User: {PamelloAppScope.User}");
+            Console.WriteLine($"User: {SampleScope.RequiredUser.Name}");
             Console.WriteLine($"Entity: {container.Entity}");
         });
         PamelloAppScope.SetUserIn(user2, () => {
