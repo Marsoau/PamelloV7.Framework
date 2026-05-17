@@ -1,5 +1,6 @@
 using PamelloV7.Framework.Core.Entities;
 using PamelloV7.Framework.Core.Entities.Attributes;
+using PamelloV7.Framework.Core.Scope;
 using PamelloV7.Framework.Shared.Attributes;
 using PamelloV7.Framework.Shared.Entities.Dto;
 
@@ -12,11 +13,15 @@ public partial class Item
     public partial string Message { get; set; }
 
     public Item(int number, string message) {
-        Number = number;
-        Message = message;
+        _number = number;
+        _message = message;
     }
 
-    public override string ToString() {
-        return $"[{Id}] {Number} \"{Message}\"";
+    public override bool IsAvailable() {
+        return base.IsAvailable();
+        //&& PamelloAppScope.User?.Id == 1;
     }
+
+    public override string ToString()
+        => $"[{Id}] {Number} \"{Message}\"";
 }
