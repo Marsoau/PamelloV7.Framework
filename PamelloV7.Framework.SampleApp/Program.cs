@@ -42,7 +42,7 @@ class Program
 
         var allItems = items.GetAll().ToList();
         
-        var clap = queries.GetSingleById<Item>(1);
+        var clap = queries.GetSingleByIdRequired(typeof(Item), 1);
         Console.WriteLine($"Clap: {clap}");
         
         Console.WriteLine($"Items: {allItems.Count}");
