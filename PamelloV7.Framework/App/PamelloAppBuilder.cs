@@ -81,7 +81,8 @@ public class PamelloAppBuilder : IHostApplicationBuilder
     }
 
     private void ConfigureForApi(WebApplicationBuilder webBuilder) {
-        webBuilder.Services.AddControllers();
+        webBuilder.Services.AddControllers()
+            .AddControllersAsServices();
         webBuilder.Services.AddSignalR();
 
         if (Options.ApiUrls.Count > 0)

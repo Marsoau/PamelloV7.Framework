@@ -30,6 +30,14 @@ public class PamelloServiceLoader : IPamelloServiceLoader
         foreach (var serviceType in AppServiceTypes) {
             collection.AddSingleton(serviceType);
 
+            var baseType = serviceType.BaseType;
+            while (baseType is not null && baseType != typeof(object)) {
+                if (!baseType.IsAssignableTo(typeof(IPamelloService))) break;
+                
+                collection.AddSingleton(baseType, services => services.GetRequiredService(serviceType));
+                baseType = baseType.BaseType;
+            }
+            
             foreach (var interfaceType in serviceType.GetInterfaces()) {
                 if (interfaceType == typeof(IPamelloService) ||
                     !interfaceType.IsAssignableTo(typeof(IPamelloService))

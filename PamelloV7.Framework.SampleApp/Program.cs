@@ -46,19 +46,9 @@ class Program
         //
         //
 
-        var container = new Safe<Item>(1);
+        var sample = app.Services.GetRequiredService<SampleServiceBase>();
 
-        var user1 = new User("Gera");
-        var user2 = new User("Pivo");
-        
-        PamelloAppScope.SetUserIn(user1, () => {
-            Console.WriteLine($"User: {SampleScope.RequiredUser.Name}");
-            Console.WriteLine($"Entity: {container.Entity}");
-        });
-        PamelloAppScope.SetUserIn(user2, () => {
-            Console.WriteLine($"User: {PamelloAppScope.User}");
-            Console.WriteLine($"Entity: {container.Entity}");
-        });
+        Console.WriteLine(sample.GetMessage());
         
         //
         //
