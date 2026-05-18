@@ -8,6 +8,12 @@ using PamelloV7.Framework.Extensions;
 
 namespace PamelloV7.Framework.Services.Loaders;
 
+public record AppServiceDescriptor(
+    Type Type,
+    Type[] OverridesTypes,
+    Type[] Interfaces
+);
+
 public class PamelloServiceLoader : IPamelloServiceLoader
 {
     private readonly PamelloAppOptions _options;

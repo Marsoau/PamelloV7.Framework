@@ -46,17 +46,15 @@ class Program
         //
         //
 
-        var sample = app.Services.GetRequiredService<SampleServiceBase>();
-
-        Console.WriteLine(sample.GetMessage());
+        //items.Add(195, "Third rail");
         
         //
         //
         //
         
-        var allItems = items.GetAll().ToList();
+        var allItems = new List<int>([1, 2]).ToSafeList<Item>();
         
-        Console.WriteLine($"Items: {allItems.Count}");
+        Console.WriteLine($"Items: {allItems.AvailableEntities.Count()}");
         foreach (var item in allItems) {
             Console.WriteLine($"| {item}");
         }
