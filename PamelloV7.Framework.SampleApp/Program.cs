@@ -47,7 +47,8 @@ class Program
         //
 
         //items.Add(195, "Third rail");
-        
+        var test = 1.ToSafe<Item>();
+        Console.WriteLine(test);
         //
         //
         //
