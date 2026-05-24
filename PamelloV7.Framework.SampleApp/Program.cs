@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PamelloV7.Framework.App;
+using PamelloV7.Framework.Core.Actions;
 using PamelloV7.Framework.Core.Config;
 using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Context;
@@ -50,7 +51,7 @@ class Program
         //
 
         //items.Add(195, "Third rail");
-        var test = 1.ToSafe<Item>().RequiredEntity;
+        var test = PamelloStaticActions.ConvertStringAsync<Item>("1");
         Console.WriteLine(test);
         
         //
