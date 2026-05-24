@@ -42,13 +42,17 @@ class Program
         var items = app.Services.GetRequiredService<ItemRepository>();
         var queries = app.Services.GetRequiredService<IPamelloEntityQueryService>();
         
+        PamelloAppScope.SetUserIn(null, () => {
+            
+        });
         //
         //
         //
 
         //items.Add(195, "Third rail");
-        var test = 1.ToSafe<Item>();
+        var test = 1.ToSafe<Item>().RequiredEntity;
         Console.WriteLine(test);
+        
         //
         //
         //
