@@ -67,18 +67,19 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
         throw new NotImplementedException();
     }
     
-    public IAsyncEnumerable<TPamelloEntity> GetAsync<TPamelloEntity>(string query) {
+    public async IAsyncEnumerable<TPamelloEntity> GetAsync<TPamelloEntity>(string query) {
         if (PamelloAppScope.User is null) throw new PamelloException("User is required to execute PEQL queries");
         
         //songs$random*3
         
-        throw new NotImplementedException();
+        //songs$all((1,2))#{Length>3:00}
+        //|songs|$|all|((1,2))|#|{Length>3:00}|
+        
+        yield break;
     }
     
     
     //
     //
     //
-    
-    
 }

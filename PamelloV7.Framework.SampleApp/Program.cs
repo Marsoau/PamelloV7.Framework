@@ -11,6 +11,7 @@ using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
+using PamelloV7.Framework.PEQL.Blocks;
 using PamelloV7.Framework.SampleApp.Entities;
 using PamelloV7.Framework.SampleApp.Repositories;
 using PamelloV7.Framework.SampleApp.Scope;
@@ -40,31 +41,13 @@ class Program
         ).Build();
         await app.StartAsync();
 
-        var items = app.Services.GetRequiredService<ItemRepository>();
-        var queries = app.Services.GetRequiredService<IPamelloEntityQueryService>();
-        
-        PamelloAppScope.SetUserIn(null, () => {
-            
-        });
-        //
-        //
-        //
+        var blocks = "some(bl{ock$st\"r}i\"ng".EnumerateStringBlocks(['$']);
 
-        //items.Add(195, "Third rail");
-        var test = PamelloStaticActions.ConvertStringAsync<Item>("1");
-        Console.WriteLine(test);
-        
-        //
-        //
-        //
-        
-        var allItems = new List<int>([1, 2]).ToSafeList<Item>();
-        
-        Console.WriteLine($"Items: {allItems.AvailableEntities.Count()}");
-        foreach (var item in allItems) {
-            Console.WriteLine($"| {item}");
+        Console.WriteLine("Blocks:");
+        foreach (var block in blocks) {
+            Console.WriteLine(block);
         }
 
-        await app.WaitForShutdownAsync();
+        await app.StopAsync();
     }
 }
