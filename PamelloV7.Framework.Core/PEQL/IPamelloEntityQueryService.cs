@@ -9,11 +9,11 @@ namespace PamelloV7.Framework.Core.PEQL;
 
 public interface IPamelloEntityQueryService : IPamelloService
 {
-    public Task<IEnumerable<TPamelloEntity>> GetAsync<TPamelloEntity>(string query);
-    
+    public IAsyncEnumerable<TPamelloEntity> GetAsync<TPamelloEntity>(string query);
+
     public TPamelloEntity? GetSingleById<TPamelloEntity>(int id)
         where TPamelloEntity : class, IPamelloBasicEntity;
-    public IEnumerable<TPamelloEntity> GetByIds<TPamelloEntity>(params int[] ids);
+    public IAsyncEnumerable<TPamelloEntity> GetByIds<TPamelloEntity>(params int[] ids);
 }
 
 public static class PamelloEntityQueryServiceExtensions
@@ -32,7 +32,7 @@ public static class PamelloEntityQueryServiceExtensions
 
         return method.MakeGenericMethod(genericTypes).Invoke(objectMethodIsOn, args);
     }
-    
+
     public static Task<IPamelloBasicEntity> GetSingleRequiredAsync(this IPamelloEntityQueryService repository, string query) => throw new NotImplementedException();
     public static Task<IPamelloBasicEntity> GetSingleRequiredAsync(this IPamelloEntityQueryService repository, Type entityType, string query) => throw new NotImplementedException();
     public static Task<TPamelloEntity> GetSingleRequiredAsync<TPamelloEntity>(this IPamelloEntityQueryService repository, string query) => throw new NotImplementedException();
@@ -42,16 +42,16 @@ public static class PamelloEntityQueryServiceExtensions
     public static TPamelloEntity GetSingleByIdRequired<TPamelloEntity>(this IPamelloEntityQueryService repository, int id)
         where TPamelloEntity : class, IPamelloBasicEntity
         => repository.GetSingleById<TPamelloEntity>(id) ?? throw NotFoundByIdException(typeof(TPamelloEntity), id);
-    
+
     public static Task<IPamelloBasicEntity> GetSingleAsync(this IPamelloEntityQueryService repository, string query) => throw new NotImplementedException();
     public static Task<IPamelloBasicEntity> GetSingleAsync(this IPamelloEntityQueryService repository, Type entityType, string query) => throw new NotImplementedException();
     public static Task<TPamelloEntity> GetSingleAsync<TPamelloEntity>(this IPamelloEntityQueryService repository, string query) => throw new NotImplementedException();
-    
-    public static Task<IEnumerable<IPamelloBasicEntity>> GetAsync(this IPamelloEntityQueryService repository, string query) => throw new NotImplementedException();
-    public static Task<IEnumerable<IPamelloBasicEntity>> GetAsync(this IPamelloEntityQueryService repository, Type entityType, string query) => throw new NotImplementedException();
-    
+
+    public static IAsyncEnumerable<IPamelloBasicEntity> GetAsync(this IPamelloEntityQueryService repository, string query) => throw new NotImplementedException();
+    public static IAsyncEnumerable<IPamelloBasicEntity> GetAsync(this IPamelloEntityQueryService repository, Type entityType, string query) => throw new NotImplementedException();
+
     public static IPamelloBasicEntity? GetSingleById(this IPamelloEntityQueryService queries, Type entityType, int id)
         => RunGenericMethod(typeof(IPamelloEntityQueryService), queries, nameof(IPamelloEntityQueryService.GetSingleById), [entityType], [id]) as IPamelloBasicEntity;
 
-    public static IEnumerable<IPamelloBasicEntity> GetByIds(this IPamelloEntityQueryService repository, Type entityType, params int[] ids) => throw new NotImplementedException();
+    public static IAsyncEnumerable<IPamelloBasicEntity> GetByIds(this IPamelloEntityQueryService repository, Type entityType, params int[] ids) => throw new NotImplementedException();
 }

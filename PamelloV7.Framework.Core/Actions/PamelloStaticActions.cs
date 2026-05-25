@@ -25,11 +25,13 @@ public static partial class PamelloStaticActions
         if (
             type.IsGenericType && (
                 type.GetGenericTypeDefinition() == typeof(List<>) ||
-                type.GetGenericTypeDefinition() == typeof(IEnumerable<>)) &&
-            type.GenericTypeArguments.First().IsAssignableTo(typeof(IPamelloBasicEntity))
+                type.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+            ) && type.GenericTypeArguments.First().IsAssignableTo(typeof(IPamelloBasicEntity))
         ) {
             if (peql is null) return null;
-            return await peql.GetAsync(type.GenericTypeArguments.First(), query);
+            
+            //todo - decide weather to return IAsyncEnumerable here or iterate it / return a blocking one
+            return peql.GetAsync(type.GenericTypeArguments.First(), query);
         }
         
         var converter = TypeDescriptor.GetConverter(type);

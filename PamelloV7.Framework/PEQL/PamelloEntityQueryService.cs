@@ -1,9 +1,13 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.Core.Repositories;
+using PamelloV7.Framework.Core.Scope;
 using PamelloV7.Framework.Repositories.Loaders;
 using PamelloV7.Framework.Shared.Entities.Base;
+using PamelloV7.Framework.Shared.Exceptions;
+using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.PEQL;
 
@@ -13,7 +17,7 @@ public record PamelloQueryProviderDescriptor(
     IPamelloRepository Repository
 );
 
-public class PamelloEntityQueryService : IPamelloEntityQueryService
+public partial class PamelloEntityQueryService : IPamelloEntityQueryService
 {
     private readonly IServiceProvider _services;
     
@@ -42,26 +46,39 @@ public class PamelloEntityQueryService : IPamelloEntityQueryService
             ));
         }
     }
+    
+    private static Type GetEntityTypeGeneric<TEntityType>() => typeof(TEntityType);
+    private PamelloQueryProviderDescriptor? GetProviderForEntityType(
+        [Variant(nameof(GetEntityTypeGeneric))]
+        Type entityType
+    ) {
+        return Providers.FirstOrDefault(p => entityType.IsAssignableTo(p.EntityType));
+    }
 
-    private PamelloQueryProviderDescriptor? GetProviderFor<TPamelloEntity>() {
-        return Providers.FirstOrDefault(p => typeof(TPamelloEntity).IsAssignableTo(p.EntityType));
-    }
-    private PamelloQueryProviderDescriptor? GetRepositoryFor<TPamelloEntity>() {
-        return Providers.FirstOrDefault(p => typeof(TPamelloEntity).IsAssignableTo(p.EntityType));
-    }
-
-    public Task<IEnumerable<TPamelloEntity>> GetAsync<TPamelloEntity>(string query) {
-        throw new NotImplementedException();
-    }
     public TPamelloEntity? GetSingleById<TPamelloEntity>(int id)
         where TPamelloEntity : class, IPamelloBasicEntity
     {
-        var provider = GetProviderFor<TPamelloEntity>();
+        var provider = GetProviderForEntityType<TPamelloEntity>();
         if (provider is null) return null;
         
         return provider.Repository.Get<TPamelloEntity>(id);
     }
-    public IEnumerable<TPamelloEntity> GetByIds<TPamelloEntity>(params int[] ids) {
+    public IAsyncEnumerable<TPamelloEntity> GetByIds<TPamelloEntity>(params int[] ids) {
         throw new NotImplementedException();
     }
+    
+    public IAsyncEnumerable<TPamelloEntity> GetAsync<TPamelloEntity>(string query) {
+        if (PamelloAppScope.User is null) throw new PamelloException("User is required to execute PEQL queries");
+        
+        //songs$random*3
+        
+        throw new NotImplementedException();
+    }
+    
+    
+    //
+    //
+    //
+    
+    
 }
