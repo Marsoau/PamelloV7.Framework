@@ -49,7 +49,7 @@ class Program
         }
 
         Console.WriteLine("Around:");
-        foreach (var around in blocks.StringsAround(block => block.Operator == '$')) {
+        foreach (var around in blocks.StringsAround(block => block.Operator == '#', 2, isBackward: true).Reverse()) {
             Console.WriteLine(around);
         }
 

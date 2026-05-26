@@ -102,10 +102,17 @@ public static class StringBlocksExtensions
         }
     }
 
-    public static IEnumerable<string> StringsAround(this IEnumerable<QueryStringBlock> blocks, Predicate<QueryStringBlock> predicate, int maxItems = int.MaxValue) {
+    public static IEnumerable<string> StringsAround(
+        this IEnumerable<QueryStringBlock> blocks,
+        Predicate<QueryStringBlock> predicate,
+        int maxItems = int.MaxValue,
+        bool isBackward = false
+    ) {
         var sb = new StringBuilder();
 
         var leftToReturn = maxItems;
+        
+        blocks = isBackward ? blocks.Reverse() : blocks;
 
         foreach (var block in blocks) {
             if (predicate(block) && leftToReturn - 1 > 0) {
@@ -116,8 +123,13 @@ public static class StringBlocksExtensions
                 
                 continue;
             }
-            
-            sb.Append(block.ToOriginalString());
+
+            if (isBackward) {
+                sb.Insert(0, block.ToOriginalString());
+            }
+            else {
+                sb.Append(block.ToOriginalString());
+            }
         }
         
         if (sb.Length > 0 && leftToReturn > 0) yield return sb.ToString();
