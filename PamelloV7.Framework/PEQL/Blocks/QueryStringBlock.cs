@@ -19,7 +19,17 @@ public record QueryStringBlock(
 )
 {
     public char? Operator => Kind == QueryStringBlockKind.Operator ? Text.FirstOrDefault() : null;
+    
     public override string ToString() => $"{Kind}[{Position}]{Text}";
+    public string ToOriginalString() => Kind switch {
+        QueryStringBlockKind.InParentheses => $"({Text})",
+        QueryStringBlockKind.InBrackets => $"[{Text}]",
+        QueryStringBlockKind.InBraces => $"{{{Text}}}",
+        QueryStringBlockKind.InAngleBrackets => $"<{Text}>",
+        QueryStringBlockKind.InDoubleQuotes => $"\"{Text}\"",
+        QueryStringBlockKind.InSingleQuotes => $"'{Text}'",
+        _ => Text
+    };
 };
 
 public static class QueryStringBlockExtensions

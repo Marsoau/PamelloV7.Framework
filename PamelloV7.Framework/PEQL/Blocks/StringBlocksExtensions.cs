@@ -1,3 +1,4 @@
+using System.Text;
 using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.PEQL.Blocks;
@@ -99,5 +100,26 @@ public static class StringBlocksExtensions
             
             return null;
         }
+    }
+
+    public static IEnumerable<string> StringsAround(this IEnumerable<QueryStringBlock> blocks, Predicate<QueryStringBlock> predicate, int maxItems = int.MaxValue) {
+        var sb = new StringBuilder();
+
+        var leftToReturn = maxItems;
+
+        foreach (var block in blocks) {
+            if (predicate(block) && leftToReturn - 1 > 0) {
+                yield return sb.ToString();
+                leftToReturn--;
+                
+                sb.Clear();
+                
+                continue;
+            }
+            
+            sb.Append(block.ToOriginalString());
+        }
+        
+        if (sb.Length > 0 && leftToReturn > 0) yield return sb.ToString();
     }
 }
