@@ -129,14 +129,15 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
             : GetProviderForEntityType<TPamelloEntity>() ?? throw new PamelloException($"No provider found for entity type {typeof(TPamelloEntity).Name}");
 
         var idRange = PamelloQueryRange.Parse(entityQuery);
-        if (idRange.StartNumber == idRange.EndNumber) {
-            var entity = provider.GetSingleById<TPamelloEntity>(idRange.StartNumber);
-            if (entity is not null) yield return entity;
-            
-            yield break;
-        }
 
         if (idRange.IsPurelyNumeric) {
+            if (idRange.StartNumber == idRange.EndNumber) {
+                var entity = provider.GetSingleById<TPamelloEntity>(idRange.StartNumber);
+                if (entity is not null) yield return entity;
+            
+                yield break;
+            }
+            
             foreach (var entity in provider.GetByIds<TPamelloEntity>(idRange.EnumerateNumericRange().ToArray())) {
                 yield return entity;
             }

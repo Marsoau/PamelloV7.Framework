@@ -32,7 +32,18 @@ public class PamelloQueryRange
     }
 
     public IEnumerable<int> EnumerateNumericRange() {
-        return Enumerable.Range(StartNumber, EndNumber - StartNumber + 1);
+        var startNumber = StartNumber;
+        var endNumber = EndNumber;
+
+        if (startNumber > endNumber) {
+            (startNumber, endNumber) = (endNumber, startNumber);
+        }
+        
+        var range = Enumerable.Range(startNumber, endNumber - startNumber + 1);
+        
+        if (StartNumber > EndNumber) return range.Reverse();
+        
+        return range;
     }
     
     private static int IndexOfSingleRange<T>(IEnumerable<T> enumerable, string singleRange) {
