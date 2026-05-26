@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
+using PamelloV7.Framework.PEQL.Blocks;
 using PamelloV7.Framework.Repositories.Loaders;
 using PamelloV7.Framework.Shared.Entities.Base;
 using PamelloV7.Framework.Shared.Exceptions;
@@ -11,11 +13,28 @@ using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.PEQL;
 
-public record PamelloQueryProviderDescriptor(
-    string Name,
-    Type EntityType,
-    IPamelloRepository Repository
-);
+public class PamelloQueryProviderDescriptor(
+    string name,
+    Type entityType,
+    IPamelloRepository repository
+)
+{
+    public readonly string Name = name;
+    public readonly Type EntityType = entityType;
+    public readonly IPamelloRepository Repository = repository;
+
+    public TPamelloEntity? GetSingleById<TPamelloEntity>(int id)
+        where TPamelloEntity : class, IPamelloBasicEntity
+    {
+        return Repository.Get<TPamelloEntity>(id);
+    }
+    
+    public IEnumerable<TPamelloEntity> GetByIds<TPamelloEntity>(params int[] ids)
+        where TPamelloEntity : class, IPamelloBasicEntity
+    {
+        return ids.Select(id => Repository.Get<TPamelloEntity>(id)).OfType<TPamelloEntity>();
+    }
+};
 
 public partial class PamelloEntityQueryService : IPamelloEntityQueryService
 {
@@ -58,24 +77,78 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
     public TPamelloEntity? GetSingleById<TPamelloEntity>(int id)
         where TPamelloEntity : class, IPamelloBasicEntity
     {
-        var provider = GetProviderForEntityType<TPamelloEntity>();
-        if (provider is null) return null;
-        
-        return provider.Repository.Get<TPamelloEntity>(id);
+        return GetProviderForEntityType<TPamelloEntity>().GetSingleById<TPamelloEntity>(id);
     }
-    public IAsyncEnumerable<TPamelloEntity> GetByIds<TPamelloEntity>(params int[] ids) {
-        throw new NotImplementedException();
+    public IEnumerable<TPamelloEntity> GetByIds<TPamelloEntity>(params int[] ids)
+        where TPamelloEntity : class, IPamelloBasicEntity
+    {
+        return GetProviderForEntityType<TPamelloEntity>().GetByIds<TPamelloEntity>(ids);
     }
     
     public async IAsyncEnumerable<TPamelloEntity> GetAsync<TPamelloEntity>(string query) {
         if (PamelloAppScope.User is null) throw new PamelloException("User is required to execute PEQL queries");
         
-        //songs$random*3
-        
         //songs$all((1,2))#{Length>3:00}
         //|songs|$|all|((1,2))|#|{Length>3:00}|
         
+        //songs$35,145,episodes$727
+        //songs$35|,|145|,|episodes$727
+        //
+        //songs|$|35
+        //145
+        //episodes|$|727
+        
+        var subQueries = query
+            .EnumerateStringBlocks([','])
+            .ToSingleBlocksAround(block => block.Kind == QueryStringBlockKind.Operator)
+            .ToList();
+
+        if (subQueries.Count > 1) {
+            string? previousProviderQuery = null;
+            
+            foreach (var subQuery in subQueries) {
+                var (providerSubQuery, entitySubQuery) = SplitQuery(subQuery.ToOriginalString());
+                
+                if (providerSubQuery is null) {
+                    if (previousProviderQuery is not null) {
+                        providerSubQuery = previousProviderQuery;
+                    }
+                    else {
+                        var provider = GetProviderForEntityType(GetEntityTypeGeneric<TPamelloEntity>());
+                        if (provider is null) throw new PamelloException($"No provider found for entity type {GetEntityTypeGeneric<TPamelloEntity>().Name}");
+                    
+                        providerSubQuery = provider.Name;
+                    }
+                }
+                
+                previousProviderQuery = providerSubQuery;
+                
+                await foreach (var entity in GetAsync<TPamelloEntity>($"{providerSubQuery}${entitySubQuery}")) {
+                    yield return entity;
+                }
+            }
+            yield break;
+        }
+
+        var (providerQuery, entityQuery) = SplitQuery(subQueries.First().ToOriginalString());
+        Debug.Assert(providerQuery is not null, "providerQuery should never be null at that point");
+
+        Console.WriteLine($"{providerQuery}|{entityQuery}");
+        
         yield break;
+    }
+
+    private static (string? ProviderQuery, string EntityQuery) SplitQuery(string query) {
+        var querySplit = query
+            .EnumerateStringBlocks(['$'])
+            .ToSingleBlocksAround(block => block.Kind == QueryStringBlockKind.Operator, 2)
+            .Select(block => block.ToOriginalString())
+            .ToList();
+        
+        if (querySplit.Count == 1) return (null, querySplit[0]);
+        if (querySplit.Count != 2) throw new PamelloException($"Query must have exactly 2 parts, but found {querySplit.Count}");
+        
+        return (querySplit[0], querySplit[1]);
     }
     
     

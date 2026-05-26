@@ -13,7 +13,8 @@ public interface IPamelloEntityQueryService : IPamelloService
 
     public TPamelloEntity? GetSingleById<TPamelloEntity>(int id)
         where TPamelloEntity : class, IPamelloBasicEntity;
-    public IAsyncEnumerable<TPamelloEntity> GetByIds<TPamelloEntity>(params int[] ids);
+    public IEnumerable<TPamelloEntity> GetByIds<TPamelloEntity>(params int[] ids)
+        where TPamelloEntity : class, IPamelloBasicEntity;
 }
 
 public static class PamelloEntityQueryServiceExtensions

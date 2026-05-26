@@ -40,6 +40,11 @@ class Program
             }
         ).Build();
         await app.StartAsync();
+        
+        var peql = app.Services.GetRequiredService<IPamelloEntityQueryService>();
+        PamelloAppScope.SetUserIn(new User("Test"), () => {
+            _ = peql.GetAsync<Item>("songs$35,145,episodes$727").ToBlockingEnumerable().ToList();
+        });
 
         var blocks = "songs$all((1,2))#\"Artur\"".EnumerateStringBlocks(['#', '$']).ToList();
 
