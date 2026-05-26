@@ -41,7 +41,7 @@ class Program
         ).Build();
         await app.StartAsync();
 
-        var blocks = "songs$all((1,2))#{Length>3:00}".EnumerateStringBlocks(['#', '$']).ToList();
+        var blocks = "songs$all((1,2))#\"Artur\"".EnumerateStringBlocks(['#', '$']).ToList();
 
         Console.WriteLine("Blocks:");
         foreach (var block in blocks) {
@@ -49,7 +49,7 @@ class Program
         }
 
         Console.WriteLine("Around:");
-        foreach (var around in blocks.StringsAround(block => block.Operator == '#', 2, isBackward: true).Reverse()) {
+        foreach (var around in blocks.ToSingleBlocksAround(block => block.Operator == '#', 2, isBackward: true).Reverse()) {
             Console.WriteLine(around);
         }
 

@@ -102,13 +102,13 @@ public static class StringBlocksExtensions
         }
     }
 
-    public static IEnumerable<string> StringsAround(
+    public static IEnumerable<QueryStringBlock> ToSingleBlocksAround(
         this IEnumerable<QueryStringBlock> blocks,
         Predicate<QueryStringBlock> predicate,
         int maxItems = int.MaxValue,
         bool isBackward = false
     ) {
-        var sb = new StringBuilder();
+        List<QueryStringBlock> currentBlocks = [];
 
         var leftToReturn = maxItems;
         
@@ -116,22 +116,45 @@ public static class StringBlocksExtensions
 
         foreach (var block in blocks) {
             if (predicate(block) && leftToReturn - 1 > 0) {
-                yield return sb.ToString();
+                if (currentBlocks.ToSingleBlock() is { } singleBlock) yield return singleBlock;
                 leftToReturn--;
                 
-                sb.Clear();
+                currentBlocks.Clear();
                 
                 continue;
             }
 
             if (isBackward) {
-                sb.Insert(0, block.ToOriginalString());
+                currentBlocks.Insert(0, block);
             }
             else {
-                sb.Append(block.ToOriginalString());
+                currentBlocks.Add(block);
             }
         }
         
-        if (sb.Length > 0 && leftToReturn > 0) yield return sb.ToString();
+        if (leftToReturn > 0 && currentBlocks.ToSingleBlock() is { } lastBlock) yield return lastBlock;
+    }
+    
+    public static QueryStringBlock? ToSingleBlock(this IEnumerable<QueryStringBlock> blocks, bool dedupe = false) {
+        var blocksList = blocks.ToList();
+        
+        switch (blocksList.Count) {
+            case 0: return null;
+            case > 1: return new QueryStringBlock(
+                blocksList.First().Position,
+                string.Join("", blocksList.Select(b => b.ToOriginalString())),
+                QueryStringBlockKind.Text
+            );
+            case 1 when !dedupe: return blocksList.First();
+        }
+
+        var singleBlock = blocksList.First();
+        
+        if (singleBlock.Kind is QueryStringBlockKind.Text or QueryStringBlockKind.Operator) return singleBlock;
+
+        var innerBlocks = singleBlock.Text.EnumerateStringBlocks().ToList();
+        if (innerBlocks.Count == 1 && innerBlocks.First().Kind == singleBlock.Kind) return innerBlocks.ToSingleBlock();
+
+        return singleBlock;
     }
 }
