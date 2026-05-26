@@ -19,54 +19,40 @@ public static class StringBlocksExtensions
     
     public static IEnumerable<QueryStringBlock> EnumerateStringBlocks(
         this string query,
-        char[]? operators = null
+        char[]? operators = null,
+        bool ignoreDelimiters = false
     ) {
         operators ??= [];
         
         QueryStringBlock? lastBlock = null;
 
-        DelimiterPosition? openedDelimiter = null;
+        List<DelimiterPosition> openedDelimiters = [];
         
         for (var i = 0; i <= query.Length; i++) {
             if (i == query.Length) {
-                if (openedDelimiter is null) break;
+                if (openedDelimiters.Count == 0) break;
 
-                i = openedDelimiter.Position;
-                openedDelimiter = null;
+                i = openedDelimiters.Last().Position;
+                openedDelimiters.RemoveAt(openedDelimiters.Count - 1);
+                
+                continue;
+            }
+
+            if (TryDelimiterBlockAt(i) is { } blockAtDelimiter) {
+                if (TryCreateTextBlockAt(blockAtDelimiter.Position - 1) is { } blockBeforeDelimiter) yield return blockBeforeDelimiter;
+                
+                yield return lastBlock = blockAtDelimiter;
                 
                 continue;
             }
             
-            if (openedDelimiter is null && Delimiters.FirstOrDefault(d => d.Left == query[i]) is { } openingDelimiter) {
-                openedDelimiter = new DelimiterPosition(i, openingDelimiter);
-                
-                continue;
-            }
-            if (Delimiters.FirstOrDefault(d => d.Right == query[i]) is { } closingDelimiter) {
-                if (openedDelimiter is null || openedDelimiter.Delimiter != closingDelimiter) continue;
-                
-                var preservedDelimiter = openedDelimiter;
-                openedDelimiter = null;
-                
-                if (TryCreateTextBlockAt(preservedDelimiter.Position - 1) is { } blockBeforeDelimiter) yield return blockBeforeDelimiter;
-                
-                yield return lastBlock = new QueryStringBlock(
-                    preservedDelimiter.Position,
-                    query[(preservedDelimiter.Position + 1)..i],
-                    null,
-                    query[i].GetKind()
-                );
-                continue;
-            }
-
-            if (openedDelimiter is not null || !operators.Contains(query[i])) continue;
+            if (openedDelimiters.Count > 0 || !operators.Contains(query[i])) continue;
             
             if (TryCreateTextBlockAt(i - 1) is { } blockBeforeOperator) yield return blockBeforeOperator;
                 
             yield return lastBlock = new QueryStringBlock(
                 i,
                 $"{query[i]}",
-                query[i],
                 QueryStringBlockKind.Operator
             );
         }
@@ -80,17 +66,38 @@ public static class StringBlocksExtensions
             : 0;
 
         QueryStringBlock? TryCreateTextBlockAt(int position) {
-            if (openedDelimiter is not null) return null;
+            if (openedDelimiters.Count > 0) return null;
             
             var lastPosition = LastBlockEndPosition();
-            if (position <= lastPosition) return null;
+            if (position < lastPosition) return null;
             
             return lastBlock = new QueryStringBlock(
                 lastPosition,
                 query[lastPosition..(position + 1)],
-                null,
                 QueryStringBlockKind.Text
             );
+        }
+
+        QueryStringBlock? TryDelimiterBlockAt(int i) {
+            if (ignoreDelimiters) return null;
+
+            if (openedDelimiters.LastOrDefault() is { } lastOpenedDelimiter
+                && lastOpenedDelimiter.Delimiter.Right == query[i]
+            ) {
+                openedDelimiters.RemoveAt(openedDelimiters.Count - 1);
+                if (openedDelimiters.Count != 0) return null;
+                
+                return new QueryStringBlock(
+                    lastOpenedDelimiter.Position,
+                    query[(lastOpenedDelimiter.Position + 1)..i],
+                    query[i].GetKind()
+                );
+            }
+            if (Delimiters.FirstOrDefault(d => d.Left == query[i]) is { } newOpeningDelimiter) {
+                openedDelimiters.Add(new DelimiterPosition(i, newOpeningDelimiter));
+            }
+            
+            return null;
         }
     }
 }

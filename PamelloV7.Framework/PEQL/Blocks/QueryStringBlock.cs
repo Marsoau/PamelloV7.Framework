@@ -15,10 +15,10 @@ public enum QueryStringBlockKind
 public record QueryStringBlock(
     int Position,
     string Text,
-    char? Operator,
     QueryStringBlockKind Kind
 )
 {
+    public char? Operator => Kind == QueryStringBlockKind.Operator ? Text.FirstOrDefault() : null;
     public override string ToString() => $"{Kind}[{Position}]{Text}";
 };
 

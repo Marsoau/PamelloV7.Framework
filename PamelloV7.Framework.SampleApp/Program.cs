@@ -41,7 +41,7 @@ class Program
         ).Build();
         await app.StartAsync();
 
-        var blocks = "some(bl{ock$st\"r}i\"ng".EnumerateStringBlocks(['$']);
+        var blocks = "songs$all((1,2))#{Length>3:00}".EnumerateStringBlocks(['#', '$']);
 
         Console.WriteLine("Blocks:");
         foreach (var block in blocks) {
