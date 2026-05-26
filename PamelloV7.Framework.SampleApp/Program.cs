@@ -42,21 +42,12 @@ class Program
         await app.StartAsync();
         
         var peql = app.Services.GetRequiredService<IPamelloEntityQueryService>();
-        PamelloAppScope.SetUserIn(new User("Test"), () => {
-            _ = peql.GetAsync<Item>("songs$35,145,episodes$727").ToBlockingEnumerable().ToList();
+        await PamelloAppScope.SetUserIn(new User("Test"), async () => {
+            Console.WriteLine("Items:");
+            await foreach (var item in peql.GetAsync<Item>("1-3")) {
+                Console.WriteLine(item);
+            }
         });
-
-        var blocks = "songs$all((1,2))#\"Artur\"".EnumerateStringBlocks(['#', '$']).ToList();
-
-        Console.WriteLine("Blocks:");
-        foreach (var block in blocks) {
-            Console.WriteLine(block);
-        }
-
-        Console.WriteLine("Around:");
-        foreach (var around in blocks.ToSingleBlocksAround(block => block.Operator == '#', 2, isBackward: true).Reverse()) {
-            Console.WriteLine(around);
-        }
 
         await app.StopAsync();
     }

@@ -6,6 +6,7 @@ using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
 using PamelloV7.Framework.PEQL.Blocks;
+using PamelloV7.Framework.PEQL.Range;
 using PamelloV7.Framework.Repositories.Loaders;
 using PamelloV7.Framework.Shared.Entities.Base;
 using PamelloV7.Framework.Shared.Exceptions;
@@ -66,26 +67,29 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
         }
     }
     
-    private static Type GetEntityTypeGeneric<TEntityType>() => typeof(TEntityType);
-    private PamelloQueryProviderDescriptor? GetProviderForEntityType(
-        [Variant(nameof(GetEntityTypeGeneric))]
-        Type entityType
-    ) {
-        return Providers.FirstOrDefault(p => entityType.IsAssignableTo(p.EntityType));
+    private PamelloQueryProviderDescriptor? GetProviderForEntityType<TEntityType>()
+        where TEntityType : class, IPamelloBasicEntity
+    {
+        return Providers.FirstOrDefault(p => typeof(TEntityType).IsAssignableTo(p.EntityType));
     }
-
+    private PamelloQueryProviderDescriptor? GetProviderByQuery(string name) {
+        return Providers.FirstOrDefault(p => p.Name == name);
+    }
+    
     public TPamelloEntity? GetSingleById<TPamelloEntity>(int id)
         where TPamelloEntity : class, IPamelloBasicEntity
     {
-        return GetProviderForEntityType<TPamelloEntity>().GetSingleById<TPamelloEntity>(id);
+        return GetProviderForEntityType<TPamelloEntity>()?.GetSingleById<TPamelloEntity>(id);
     }
     public IEnumerable<TPamelloEntity> GetByIds<TPamelloEntity>(params int[] ids)
         where TPamelloEntity : class, IPamelloBasicEntity
     {
-        return GetProviderForEntityType<TPamelloEntity>().GetByIds<TPamelloEntity>(ids);
+        return GetProviderForEntityType<TPamelloEntity>()?.GetByIds<TPamelloEntity>(ids) ?? [];
     }
     
-    public async IAsyncEnumerable<TPamelloEntity> GetAsync<TPamelloEntity>(string query) {
+    public async IAsyncEnumerable<TPamelloEntity> GetAsync<TPamelloEntity>(string query) 
+        where TPamelloEntity : class, IPamelloBasicEntity
+    {
         if (PamelloAppScope.User is null) throw new PamelloException("User is required to execute PEQL queries");
         
         //songs$all((1,2))#{Length>3:00}
@@ -109,19 +113,7 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
             foreach (var subQuery in subQueries) {
                 var (providerSubQuery, entitySubQuery) = SplitQuery(subQuery.ToOriginalString());
                 
-                if (providerSubQuery is null) {
-                    if (previousProviderQuery is not null) {
-                        providerSubQuery = previousProviderQuery;
-                    }
-                    else {
-                        var provider = GetProviderForEntityType(GetEntityTypeGeneric<TPamelloEntity>());
-                        if (provider is null) throw new PamelloException($"No provider found for entity type {GetEntityTypeGeneric<TPamelloEntity>().Name}");
-                    
-                        providerSubQuery = provider.Name;
-                    }
-                }
-                
-                previousProviderQuery = providerSubQuery;
+                providerSubQuery ??= previousProviderQuery ??= GetProviderForEntityType<TPamelloEntity>()?.Name;
                 
                 await foreach (var entity in GetAsync<TPamelloEntity>($"{providerSubQuery}${entitySubQuery}")) {
                     yield return entity;
@@ -131,11 +123,28 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
         }
 
         var (providerQuery, entityQuery) = SplitQuery(subQueries.First().ToOriginalString());
-        Debug.Assert(providerQuery is not null, "providerQuery should never be null at that point");
-
-        Console.WriteLine($"{providerQuery}|{entityQuery}");
         
-        yield break;
+        var provider = providerQuery is not null
+            ? GetProviderByQuery(providerQuery) ?? throw new PamelloException($"No provider found by provider query \"{providerQuery}\"")
+            : GetProviderForEntityType<TPamelloEntity>() ?? throw new PamelloException($"No provider found for entity type {typeof(TPamelloEntity).Name}");
+
+        var idRange = PamelloQueryRange.Parse(entityQuery);
+        if (idRange.StartNumber == idRange.EndNumber) {
+            var entity = provider.GetSingleById<TPamelloEntity>(idRange.StartNumber);
+            if (entity is not null) yield return entity;
+            
+            yield break;
+        }
+
+        if (idRange.IsPurelyNumeric) {
+            foreach (var entity in provider.GetByIds<TPamelloEntity>(idRange.EnumerateNumericRange().ToArray())) {
+                yield return entity;
+            }
+            
+            yield break;
+        }
+        
+        Console.WriteLine($"{provider.Name}|{idRange}");
     }
 
     private static (string? ProviderQuery, string EntityQuery) SplitQuery(string query) {

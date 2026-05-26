@@ -9,7 +9,8 @@ namespace PamelloV7.Framework.Core.PEQL;
 
 public interface IPamelloEntityQueryService : IPamelloService
 {
-    public IAsyncEnumerable<TPamelloEntity> GetAsync<TPamelloEntity>(string query);
+    public IAsyncEnumerable<TPamelloEntity> GetAsync<TPamelloEntity>(string query)
+        where TPamelloEntity : class, IPamelloBasicEntity;
 
     public TPamelloEntity? GetSingleById<TPamelloEntity>(int id)
         where TPamelloEntity : class, IPamelloBasicEntity;

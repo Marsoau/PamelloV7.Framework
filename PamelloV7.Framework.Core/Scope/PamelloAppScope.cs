@@ -26,4 +26,16 @@ public static class PamelloAppScope
             CurrentScopeUser.Value = previousUser;
         }
     }
+    
+    public static T SetUserIn<T>(IPamelloBasicUser? user, Func<T> action) {
+        var previousUser = CurrentScopeUser.Value;
+        CurrentScopeUser.Value = user;
+
+        try {
+            return action();
+        }
+        finally {
+            CurrentScopeUser.Value = previousUser;
+        }
+    }
 }
