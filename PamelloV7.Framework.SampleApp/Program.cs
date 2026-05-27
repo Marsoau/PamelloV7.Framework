@@ -45,11 +45,9 @@ class Program
         var peql = app.Services.GetRequiredService<IPamelloEntityQueryService>();
         
         Console.WriteLine("Items:");
-        await foreach (var item in peql.GetAsync(typeof(Item), "1,2,3,2,1")) {
+        await foreach (var item in peql.GetAsync(typeof(Item), "test(args)")) {
             Console.WriteLine(item);
         }
-        
-        Console.WriteLine($"Single Item: {await peql.GetSingleAsync(typeof(Item), "3")}");
 
         await app.StopAsync();
     }

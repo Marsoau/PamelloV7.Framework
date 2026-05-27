@@ -18,6 +18,16 @@ public class PamelloQueryRange
     }
 
     public static implicit operator PamelloQueryRange(string s) => Parse(s);
+    public static PamelloQueryRange? ParseOrDefault(string stringRange, bool shouldBeNumeric = false) {
+        try {
+            return Parse(stringRange) is { } range && range.IsPurelyNumeric & shouldBeNumeric
+                ? range
+                : null;
+        }
+        catch {
+            return null;
+        }
+    }
     public static PamelloQueryRange Parse(string range) {
         var blocks = range
             .EnumerateStringBlocks(['-'])

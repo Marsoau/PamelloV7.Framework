@@ -1,8 +1,10 @@
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.PEQL;
+using PamelloV7.Framework.Core.PEQL.Attributes;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
 using PamelloV7.Framework.PEQL.Blocks;
@@ -14,15 +16,38 @@ using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.PEQL;
 
+public class PamelloQueryProviderPointDescriptor(
+    ProviderPointAttribute attribute,
+    MethodInfo method,
+    object? providerInstance
+)
+{
+    public readonly MethodInfo Method = method;
+    public readonly ProviderPointAttribute Attribute = attribute;
+    public readonly object? ProviderInstance = providerInstance;
+
+    public IAsyncEnumerable<TPamelloEntity> Execute<TPamelloEntity>()
+        where TPamelloEntity : class, IPamelloBasicEntity
+    {
+        throw new NotImplementedException();
+    }
+    
+    public IAsyncEnumerable<IPamelloBasicEntity> Execute() {
+        throw new NotImplementedException();
+    }
+}
+
 public class PamelloQueryProviderDescriptor(
     string name,
     Type entityType,
-    IPamelloRepository repository
+    IPamelloRepository repository,
+    List<PamelloQueryProviderPointDescriptor> points
 )
 {
     public readonly string Name = name;
     public readonly Type EntityType = entityType;
     public readonly IPamelloRepository Repository = repository;
+    public readonly List<PamelloQueryProviderPointDescriptor> Points = points;
 
     public TPamelloEntity? GetSingleById<TPamelloEntity>(int id)
         where TPamelloEntity : class, IPamelloBasicEntity
@@ -34,6 +59,10 @@ public class PamelloQueryProviderDescriptor(
         where TPamelloEntity : class, IPamelloBasicEntity
     {
         return ids.Select(id => Repository.Get<TPamelloEntity>(id)).OfType<TPamelloEntity>();
+    }
+
+    public PamelloQueryProviderPointDescriptor? GetPointByName(string name) {
+        return Points.FirstOrDefault(p => p.Attribute.Names.Contains(name));
     }
 };
 
@@ -59,10 +88,25 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
 
             PamelloOutput.Write($"| {repositoryDescriptor.Attribute.EntityType.Name} \"{repositoryDescriptor.Attribute.ProviderName}\"");
             
+            var points = new List<PamelloQueryProviderPointDescriptor>();
+
+            foreach (var method in repositoryDescriptor.RepositoryType.GetMethods()) {
+                if (method.GetCustomAttribute<ProviderPointAttribute>() is not { } pointMethodAttribute) continue;
+
+                PamelloOutput.Write($"|   {pointMethodAttribute}");
+                
+                points.Add(new PamelloQueryProviderPointDescriptor(
+                    pointMethodAttribute,
+                    method,
+                    repository
+                ));
+            }
+            
             Providers.Add(new PamelloQueryProviderDescriptor(
                 repositoryDescriptor.Attribute.ProviderName,
                 repositoryDescriptor.Attribute.EntityType,
-                repository
+                repository,
+                points
             ));
         }
     }
@@ -109,7 +153,7 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
             string? previousProviderQuery = null;
             
             foreach (var subQuery in subQueries) {
-                var (providerSubQuery, entitySubQuery) = SplitQuery(subQuery.ToOriginalString());
+                var (providerSubQuery, entitySubQuery) = SplitFullQuery(subQuery.ToOriginalString());
                 
                 providerSubQuery ??= previousProviderQuery;
                 providerSubQuery ??= GetProviderForEntityType<TPamelloEntity>()?.Name;
@@ -123,15 +167,19 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
             yield break;
         }
 
-        var (providerQuery, entityQuery) = SplitQuery(subQueries.First().ToOriginalString());
+        var (providerQuery, entityQuery) = SplitFullQuery(subQueries.First().ToOriginalString());
         
         var provider = providerQuery is not null
             ? GetProviderByQuery(providerQuery) ?? throw new PamelloException($"No provider found by provider query \"{providerQuery}\"")
             : GetProviderForEntityType<TPamelloEntity>() ?? throw new PamelloException($"No provider found for entity type {typeof(TPamelloEntity).Name}");
+        
+        //
+        //id
+        //
 
-        var idRange = PamelloQueryRange.Parse(entityQuery);
+        var idRange = PamelloQueryRange.ParseOrDefault(entityQuery, true);
 
-        if (idRange.IsPurelyNumeric) {
+        if (idRange is { IsPurelyNumeric: true }) {
             if (idRange.StartNumber == idRange.EndNumber) {
                 var entity = provider.GetSingleById<TPamelloEntity>(idRange.StartNumber);
                 if (entity is not null) yield return entity;
@@ -146,10 +194,21 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
             yield break;
         }
         
-        Console.WriteLine($"{provider.Name}|{idRange}");
+        //
+        //point
+        //
+        
+        var (pointName, pointArguments) = SplitPointQuery(entityQuery);
+        var point = provider.GetPointByName(pointName);
+
+        if (point is not null) {
+            Console.WriteLine($"{pointName}|{pointArguments}; {point.Attribute}");
+        }
+        
+        Console.WriteLine($"{provider.Name}|{entityQuery}");
     }
 
-    private static (string? ProviderQuery, string EntityQuery) SplitQuery(string query) {
+    private static (string? ProviderQuery, string EntityQuery) SplitFullQuery(string query) {
         var querySplit = query
             .EnumerateStringBlocks(['$'])
             .ToSingleBlocksAround(block => block.Kind == QueryStringBlockKind.Operator, 2)
@@ -161,7 +220,18 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
         
         return (querySplit[0], querySplit[1]);
     }
-    
+
+    private static (string PointName, string? PointArguments) SplitPointQuery(string query) {
+        var blocks = query.EnumerateStringBlocks().ToList();
+        
+        var argumentsBlock = blocks.LastOrDefault(b => b.Kind == QueryStringBlockKind.InParentheses);
+        if (argumentsBlock is not null) blocks.Remove(argumentsBlock);
+
+        return (
+            blocks.ToSingleBlock()?.ToOriginalString() ?? "",
+            argumentsBlock?.Text
+        );
+    }
     
     //
     //
