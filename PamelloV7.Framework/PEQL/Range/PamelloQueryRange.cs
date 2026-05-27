@@ -46,20 +46,31 @@ public class PamelloQueryRange
         return range;
     }
     
-    private static int IndexOfSingleRange<T>(IEnumerable<T> enumerable, string singleRange) {
-        if (int.TryParse(singleRange, out var index)) {
-            if (index == 0) return 0;
-
-            var count = enumerable.Count();
-
-            if (index < 0) {
-                return count - (-index - 1) % count;
-            }
-
-            return index % count;
+    public int StartIndex(int count, bool includeLastEmpty = false) => IndexOfRangePoint(count, StartValue, includeLastEmpty);
+    public int EndIndex(int count, bool includeLastEmpty = false) => IndexOfRangePoint(count, EndValue, includeLastEmpty);
+    
+    public static int IndexOfRangePoint(int count, string rangePoint, bool includeLastEmpty = false) {
+        if (int.TryParse(rangePoint, out var index)) {
+            return index switch {
+                0 => 0,
+                < 0 => count - (-index - 1) % count,
+                _ => (index - 1) % count
+            };
         }
         
-        throw new NotSupportedException();
+        return rangePoint switch {
+            "first" or "start" => 0,
+            "last" or "end" => includeLastEmpty ? count : count - 1,
+            "random" => Random.Shared.Next(count),
+            "current" => GetCurrent(),
+            "next" => (GetCurrent() + 1) % count,
+            "prev" or "previous" => GetCurrent() is var current && current != 0
+                ? current - 1
+                : count - 1,
+            _ => throw new NotImplementedException()
+        };
+        
+        int GetCurrent() => throw new NotImplementedException();
     }
     
     public override string ToString() => $"{StartValue}-{EndValue}";

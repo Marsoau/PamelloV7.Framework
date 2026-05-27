@@ -12,6 +12,7 @@ using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
 using PamelloV7.Framework.PEQL.Blocks;
+using PamelloV7.Framework.PEQL.Range;
 using PamelloV7.Framework.SampleApp.Entities;
 using PamelloV7.Framework.SampleApp.Repositories;
 using PamelloV7.Framework.SampleApp.Scope;
@@ -48,6 +49,13 @@ class Program
                 Console.WriteLine(item);
             }
         });
+
+        var range = new PamelloQueryRange("2", "4");
+        var nums = new List<int>([1, 2, 3, 4, 5]);
+        
+        foreach (var num in nums.GetRange(range)) {
+            Console.WriteLine(num);
+        }
 
         await app.StopAsync();
     }
