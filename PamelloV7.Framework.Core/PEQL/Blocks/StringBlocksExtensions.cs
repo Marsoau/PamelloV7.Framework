@@ -1,7 +1,4 @@
-using System.Text;
-using PamelloV7.Framework.Shared.Variants.Attributes;
-
-namespace PamelloV7.Framework.PEQL.Blocks;
+namespace PamelloV7.Framework.Core.PEQL.Blocks;
 
 public static class StringBlocksExtensions
 {

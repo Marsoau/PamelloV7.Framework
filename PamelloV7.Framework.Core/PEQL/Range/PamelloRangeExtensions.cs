@@ -1,4 +1,4 @@
-namespace PamelloV7.Framework.PEQL.Range;
+namespace PamelloV7.Framework.Core.PEQL.Range;
 
 public static class PamelloRangeExtensions
 {

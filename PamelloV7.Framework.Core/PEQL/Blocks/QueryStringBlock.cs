@@ -1,4 +1,4 @@
-namespace PamelloV7.Framework.PEQL.Blocks;
+namespace PamelloV7.Framework.Core.PEQL.Blocks;
 
 public enum QueryStringBlockKind
 {

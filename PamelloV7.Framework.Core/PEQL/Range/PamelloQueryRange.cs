@@ -1,6 +1,6 @@
-using PamelloV7.Framework.PEQL.Blocks;
+using PamelloV7.Framework.Core.PEQL.Blocks;
 
-namespace PamelloV7.Framework.PEQL.Range;
+namespace PamelloV7.Framework.Core.PEQL.Range;
 
 public class PamelloQueryRange
 {
