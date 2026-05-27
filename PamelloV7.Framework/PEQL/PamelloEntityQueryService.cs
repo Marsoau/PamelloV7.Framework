@@ -90,8 +90,6 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
     public async IAsyncEnumerable<TPamelloEntity> GetAsync<TPamelloEntity>(string query) 
         where TPamelloEntity : class, IPamelloBasicEntity
     {
-        if (PamelloAppScope.User is null) throw new PamelloException("User is required to execute PEQL queries");
-        
         //songs$all((1,2))#{Length>3:00}
         //|songs|$|all|((1,2))|#|{Length>3:00}|
         

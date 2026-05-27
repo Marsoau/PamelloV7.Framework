@@ -44,14 +44,12 @@ class Program
         
         var peql = app.Services.GetRequiredService<IPamelloEntityQueryService>();
         
-        await PamelloAppScope.SetUserIn(new User("Test"), async () => {
-            Console.WriteLine("Items:");
-            await foreach (var item in peql.GetAsync(typeof(Item), "1,2,3,2,1")) {
-                Console.WriteLine(item);
-            }
-            
-            Console.WriteLine($"Single Item: {await peql.GetSingleAsync(typeof(Item), "3")}");
-        });
+        Console.WriteLine("Items:");
+        await foreach (var item in peql.GetAsync(typeof(Item), "1,2,3,2,1")) {
+            Console.WriteLine(item);
+        }
+        
+        Console.WriteLine($"Single Item: {await peql.GetSingleAsync(typeof(Item), "3")}");
 
         await app.StopAsync();
     }
