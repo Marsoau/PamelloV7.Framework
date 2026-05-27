@@ -17,6 +17,7 @@ public class PamelloQueryRange
         EndValue = endValue;
     }
 
+    public static implicit operator PamelloQueryRange(string s) => Parse(s);
     public static PamelloQueryRange Parse(string range) {
         var blocks = range
             .EnumerateStringBlocks(['-'])

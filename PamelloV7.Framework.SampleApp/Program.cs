@@ -50,10 +50,9 @@ class Program
             }
         });
 
-        var range = new PamelloQueryRange("2", "4");
         var nums = new List<int>([1, 2, 3, 4, 5]);
         
-        foreach (var num in nums.GetRange(range)) {
+        foreach (var num in nums.GetRange("random-random")) {
             Console.WriteLine(num);
         }
 
