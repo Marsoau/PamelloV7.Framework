@@ -113,7 +113,10 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
             foreach (var subQuery in subQueries) {
                 var (providerSubQuery, entitySubQuery) = SplitQuery(subQuery.ToOriginalString());
                 
-                providerSubQuery ??= previousProviderQuery ??= GetProviderForEntityType<TPamelloEntity>()?.Name;
+                providerSubQuery ??= previousProviderQuery;
+                providerSubQuery ??= GetProviderForEntityType<TPamelloEntity>()?.Name;
+                
+                previousProviderQuery = providerSubQuery;
                 
                 await foreach (var entity in GetAsync<TPamelloEntity>($"{providerSubQuery}${entitySubQuery}")) {
                     yield return entity;

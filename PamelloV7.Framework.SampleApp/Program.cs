@@ -43,18 +43,15 @@ class Program
         await app.StartAsync();
         
         var peql = app.Services.GetRequiredService<IPamelloEntityQueryService>();
+        
         await PamelloAppScope.SetUserIn(new User("Test"), async () => {
             Console.WriteLine("Items:");
-            await foreach (var item in peql.GetAsync<Item>("3-(1)")) {
+            await foreach (var item in peql.GetAsync(typeof(Item), "1,2,3,2,1")) {
                 Console.WriteLine(item);
             }
+            
+            Console.WriteLine($"Single Item: {await peql.GetSingleAsync(typeof(Item), "3")}");
         });
-
-        var nums = new List<int>([1, 2, 3, 4, 5]);
-        
-        foreach (var num in nums.GetRange("random-random")) {
-            Console.WriteLine(num);
-        }
 
         await app.StopAsync();
     }
