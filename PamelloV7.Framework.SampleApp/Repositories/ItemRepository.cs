@@ -11,7 +11,7 @@ namespace PamelloV7.Framework.SampleApp.Repositories;
 public partial class ItemRepository
 {
     [ProviderPoint("number")]
-    public IEnumerable<Item> GetBySomeNumber(int number) {
+    public IEnumerable<Item> GetBySomeNumber(int number = 222) {
         return Available.Where(e => e.Number == number);
     }
     

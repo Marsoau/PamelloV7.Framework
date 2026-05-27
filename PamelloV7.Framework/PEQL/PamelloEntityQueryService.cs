@@ -1,14 +1,16 @@
+using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
+using PamelloV7.Framework.Core.Actions;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.Core.PEQL.Attributes;
+using PamelloV7.Framework.Core.PEQL.Blocks;
+using PamelloV7.Framework.Core.PEQL.Range;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
-using PamelloV7.Framework.PEQL.Blocks;
-using PamelloV7.Framework.PEQL.Range;
 using PamelloV7.Framework.Repositories.Loaders;
 using PamelloV7.Framework.Shared.Entities.Base;
 using PamelloV7.Framework.Shared.Exceptions;
@@ -18,22 +20,45 @@ namespace PamelloV7.Framework.PEQL;
 
 public class PamelloQueryProviderPointDescriptor(
     ProviderPointAttribute attribute,
-    MethodInfo method,
+    MethodInfo targetMethod,
     object? providerInstance
 )
 {
-    public readonly MethodInfo Method = method;
+    public readonly MethodInfo TargetMethod = targetMethod;
     public readonly ProviderPointAttribute Attribute = attribute;
     public readonly object? ProviderInstance = providerInstance;
 
-    public IAsyncEnumerable<TPamelloEntity> Execute<TPamelloEntity>()
+    public async IAsyncEnumerable<TPamelloEntity> Execute<TPamelloEntity>(string argumentsString, IPamelloEntityQueryService? peql)
         where TPamelloEntity : class, IPamelloBasicEntity
     {
-        throw new NotImplementedException();
-    }
-    
-    public IAsyncEnumerable<IPamelloBasicEntity> Execute() {
-        throw new NotImplementedException();
+        var arguments = await PamelloStaticActions.EnumerateArgumentsForParameters(
+            argumentsString,
+            TargetMethod.GetParameters(),
+            peql
+        ).ToArrayAsync();
+        
+        var result = TargetMethod.Invoke(ProviderInstance, arguments);
+        if (result is null) yield break;
+        
+        var resultType = result.GetType();
+        if (resultType.IsAssignableTo(typeof(TPamelloEntity))) {
+            yield return (TPamelloEntity)result;
+        }
+        else if (resultType.GetGenericTypeDefinition() == typeof(Task<>)
+            || resultType.GetGenericTypeDefinition() == typeof(ValueTask<>)
+        ) {
+            yield return (TPamelloEntity) await (dynamic)result;
+        }
+        else if (resultType.IsAssignableTo(typeof(IEnumerable))) {
+            foreach (var entity in ((IEnumerable)result).OfType<TPamelloEntity>()) {
+                yield return entity;
+            }
+        }
+        else if (resultType.IsAssignableTo(typeof(IAsyncEnumerable<TPamelloEntity>))) {
+            await foreach (var entity in (IAsyncEnumerable<TPamelloEntity>)result) {
+                yield return entity;
+            }
+        }
     }
 }
 
@@ -202,10 +227,10 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
         var point = provider.GetPointByName(pointName);
 
         if (point is not null) {
-            Console.WriteLine($"{pointName}|{pointArguments}; {point.Attribute}");
+            await foreach (var entity in point.Execute<TPamelloEntity>(pointArguments ?? "", this)) {
+                yield return entity;
+            }
         }
-        
-        Console.WriteLine($"{provider.Name}|{entityQuery}");
     }
 
     private static (string? ProviderQuery, string EntityQuery) SplitFullQuery(string query) {

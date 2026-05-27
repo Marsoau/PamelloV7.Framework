@@ -11,8 +11,6 @@ using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
-using PamelloV7.Framework.PEQL.Blocks;
-using PamelloV7.Framework.PEQL.Range;
 using PamelloV7.Framework.SampleApp.Entities;
 using PamelloV7.Framework.SampleApp.Repositories;
 using PamelloV7.Framework.SampleApp.Scope;
@@ -45,7 +43,7 @@ class Program
         var peql = app.Services.GetRequiredService<IPamelloEntityQueryService>();
         
         Console.WriteLine("Items:");
-        await foreach (var item in peql.GetAsync(typeof(Item), "test(args)")) {
+        await foreach (var item in peql.GetAsync(typeof(Item), "number(123)")) {
             Console.WriteLine(item);
         }
 
