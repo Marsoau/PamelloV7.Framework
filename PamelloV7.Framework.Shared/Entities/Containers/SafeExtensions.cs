@@ -19,10 +19,17 @@ public static class SafeExtensions
         where TPamelloEntity : class, IPamelloBasicEntity
         => new(entityId);
     
-    public static SafeCollection<TPamelloEntity> ToSafeList<TPamelloEntity>(this IEnumerable<TPamelloEntity> entities)
+    public static SafeCollection<TPamelloEntity> ToSafeCollection<TPamelloEntity>(this IEnumerable<TPamelloEntity> entities)
         where TPamelloEntity : class, IPamelloBasicEntity
         => new(entities);
-    public static SafeCollection<TPamelloEntity> ToSafeList<TPamelloEntity>(this IEnumerable<int> entities)
+    public static SafeCollection<TPamelloEntity> ToSafeCollection<TPamelloEntity>(this IEnumerable<int> entities)
         where TPamelloEntity : class, IPamelloBasicEntity
         => new(entities);
+    
+    public static async ValueTask<SafeCollection<TPamelloEntity>> ToSafeCollectionAsync<TPamelloEntity>(this IAsyncEnumerable<TPamelloEntity> entities)
+        where TPamelloEntity : class, IPamelloBasicEntity
+        => new(await entities.ToListAsync());
+    public static async ValueTask<SafeCollection<TPamelloEntity>> ToSafeCollectionAsync<TPamelloEntity>(this IAsyncEnumerable<int> entitiesIds)
+        where TPamelloEntity : class, IPamelloBasicEntity
+        => new(await entitiesIds.ToListAsync());
 }
