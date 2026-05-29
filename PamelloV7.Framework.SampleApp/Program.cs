@@ -43,7 +43,9 @@ class Program
         var peql = app.Services.GetRequiredService<IPamelloEntityQueryService>();
         
         Console.WriteLine("Items:");
-        await foreach (var item in peql.GetAsync(typeof(Item), "number(123)")) {
+        var items = await "2,2,3".ConvertToTypeAsync<IEnumerable<Item>>(peql);
+        
+        foreach (var item in items!) {
             Console.WriteLine(item);
         }
 
