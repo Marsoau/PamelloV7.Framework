@@ -42,11 +42,10 @@ class Program
         await app.StartAsync();
         
         var peql = app.Services.GetRequiredService<IPamelloEntityQueryService>();
-        var multiplication = app.Services.GetRequiredService<PamelloQueryMultiplicationOperator>();
         
         Console.WriteLine("Items:");
         
-        await foreach (var item in multiplication.Execute("items$1,2,3", "3")) {
+        await foreach (var item in peql.GetAsync<Item>("1,2,3*5")) {
             Console.WriteLine(item);
         }
 

@@ -15,6 +15,6 @@ public abstract class PamelloQueryOperator
     }
 
     
-    public abstract IAsyncEnumerable<IPamelloBasicEntity> Execute(string query, PamelloQueryBlock arg);
+    public abstract IAsyncEnumerable<IPamelloBasicEntity> Execute(string query, PamelloQueryBlock? arg);
 }
 

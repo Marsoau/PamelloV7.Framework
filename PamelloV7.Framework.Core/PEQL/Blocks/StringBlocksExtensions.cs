@@ -99,6 +99,30 @@ public static class StringBlocksExtensions
         }
     }
 
+    public static (
+        PamelloQueryBlock? Target,
+        PamelloQueryBlock? Left,
+        PamelloQueryBlock? Right
+    ) ToBlocksPairAround(
+        this IEnumerable<PamelloQueryBlock> blocks,
+        Predicate<PamelloQueryBlock> predicate
+    ) {
+        PamelloQueryBlock? target = null;
+        var targetSeparatedBlocks = blocks.ToSingleBlocksAround(block => {
+            if (!predicate(block)) return false;
+            
+            target = block;
+            
+            return true;
+        }, 2, true).Reverse().ToList();
+
+        return (
+            target,
+            targetSeparatedBlocks.ElementAtOrDefault(0),
+            targetSeparatedBlocks.ElementAtOrDefault(1)
+        );
+    }
+
     public static IEnumerable<PamelloQueryBlock> ToSingleBlocksAround(
         this IEnumerable<PamelloQueryBlock> blocks,
         Predicate<PamelloQueryBlock> predicate,

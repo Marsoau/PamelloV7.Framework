@@ -149,6 +149,33 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
         }
         
         //
+        //operator
+        //
+        
+        var result = entityQuery.EnumerateStringBlocks(
+            _loader.OperatorsDescriptors.Select(o => o.Attribute.Operator).ToArray()
+        ).ToBlocksPairAround(block => block.Kind == QueryStringBlockKind.Operator);
+
+        var peqlOperatorDescriptor = result.Target is not null && result.Target.Kind == QueryStringBlockKind.Operator
+            ? _loader.OperatorsDescriptors.FirstOrDefault(o => o.Attribute.Operator == result.Target?.Text.FirstOrDefault())
+            : null;
+        
+        var peqlOperator = peqlOperatorDescriptor is not null
+            ? (PamelloQueryOperator)_services.GetRequiredService(peqlOperatorDescriptor.Type)
+            : null;
+
+        if (peqlOperator is not null && peqlOperatorDescriptor is not null) {
+            var entities = peqlOperator.Execute(
+                $"{providerQuery}${result.Left?.Text}",
+                result.Right
+            );
+
+            await foreach (var entity in entities.OfType<TPamelloEntity>()) {
+                yield return entity;
+            }
+        }
+        
+        //
         //point
         //
         
