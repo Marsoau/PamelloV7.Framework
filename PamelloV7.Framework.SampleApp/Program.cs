@@ -45,7 +45,7 @@ class Program
         
         Console.WriteLine("Items:");
         
-        await foreach (var item in peql.GetAsync<Item>("1,2,3*5")) {
+        await foreach (var item in peql.GetAsync<Item>("(3,2,1):random*3")) {
             Console.WriteLine(item);
         }
 

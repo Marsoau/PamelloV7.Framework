@@ -10,7 +10,7 @@ public partial class PamelloQueryMultiplicationOperator
 {
     public PamelloQueryMultiplicationOperator(IServiceProvider services) : base(services) { }
 
-    public override async IAsyncEnumerable<IPamelloBasicEntity> Execute(string query, PamelloQueryBlock arg) {
+    public override async IAsyncEnumerable<IPamelloBasicEntity> Execute(string query, PamelloQueryBlock? arg) {
         var repeatCount = int.Parse(arg.Text);
 
         for (var i = 0; i < repeatCount; i++)
