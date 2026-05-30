@@ -20,6 +20,7 @@ public record PamelloQueryBlock(
 {
     public char? Operator => Kind == QueryStringBlockKind.Operator ? Text.FirstOrDefault() : null;
     
+    public static implicit operator PamelloQueryBlock(string s) => new(0, s, QueryStringBlockKind.Text);
     public override string ToString() => $"{Kind}[{Position}]{Text}";
     public string ToOriginalString() => Kind switch {
         QueryStringBlockKind.InParentheses => $"({Text})",

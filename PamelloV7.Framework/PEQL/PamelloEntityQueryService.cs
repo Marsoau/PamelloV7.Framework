@@ -12,85 +12,13 @@ using PamelloV7.Framework.Core.PEQL.Operators;
 using PamelloV7.Framework.Core.PEQL.Range;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
+using PamelloV7.Framework.PEQL.Descriptors;
 using PamelloV7.Framework.Repositories.Loaders;
 using PamelloV7.Framework.Shared.Entities.Base;
 using PamelloV7.Framework.Shared.Exceptions;
 using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.PEQL;
-
-public class PamelloQueryProviderPointDescriptor(
-    ProviderPointAttribute attribute,
-    MethodInfo targetMethod,
-    object? providerInstance
-)
-{
-    public readonly MethodInfo TargetMethod = targetMethod;
-    public readonly ProviderPointAttribute Attribute = attribute;
-    public readonly object? ProviderInstance = providerInstance;
-
-    public async IAsyncEnumerable<TPamelloEntity> Execute<TPamelloEntity>(string argumentsString, IPamelloEntityQueryService? peql)
-        where TPamelloEntity : class, IPamelloBasicEntity
-    {
-        var arguments = await PamelloStaticActions.EnumerateArgumentsForParameters(
-            argumentsString,
-            TargetMethod.GetParameters(),
-            peql
-        ).ToArrayAsync();
-        
-        var result = TargetMethod.Invoke(ProviderInstance, arguments);
-        if (result is null) yield break;
-        
-        var resultType = result.GetType();
-        if (resultType.IsAssignableTo(typeof(TPamelloEntity))) {
-            yield return (TPamelloEntity)result;
-        }
-        else if (resultType.GetGenericTypeDefinition() == typeof(Task<>)
-            || resultType.GetGenericTypeDefinition() == typeof(ValueTask<>)
-        ) {
-            yield return (TPamelloEntity) await (dynamic)result;
-        }
-        else if (resultType.IsAssignableTo(typeof(IEnumerable))) {
-            foreach (var entity in ((IEnumerable)result).OfType<TPamelloEntity>()) {
-                yield return entity;
-            }
-        }
-        else if (resultType.IsAssignableTo(typeof(IAsyncEnumerable<TPamelloEntity>))) {
-            await foreach (var entity in (IAsyncEnumerable<TPamelloEntity>)result) {
-                yield return entity;
-            }
-        }
-    }
-}
-
-public class PamelloQueryProviderDescriptor(
-    string name,
-    Type entityType,
-    IPamelloRepository repository,
-    List<PamelloQueryProviderPointDescriptor> points
-)
-{
-    public readonly string Name = name;
-    public readonly Type EntityType = entityType;
-    public readonly IPamelloRepository Repository = repository;
-    public readonly List<PamelloQueryProviderPointDescriptor> Points = points;
-
-    public TPamelloEntity? GetSingleById<TPamelloEntity>(int id)
-        where TPamelloEntity : class, IPamelloBasicEntity
-    {
-        return Repository.Get<TPamelloEntity>(id);
-    }
-    
-    public IEnumerable<TPamelloEntity> GetByIds<TPamelloEntity>(params int[] ids)
-        where TPamelloEntity : class, IPamelloBasicEntity
-    {
-        return ids.Select(id => Repository.Get<TPamelloEntity>(id)).OfType<TPamelloEntity>();
-    }
-
-    public PamelloQueryProviderPointDescriptor? GetPointByName(string name) {
-        return Points.FirstOrDefault(p => p.Attribute.Names.Contains(name));
-    }
-};
 
 public partial class PamelloEntityQueryService : IPamelloEntityQueryService
 {
@@ -99,6 +27,7 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
     private readonly PamelloRepositoriesLoader _repositoriesLoader;
     
     public readonly List<PamelloQueryProviderDescriptor> Providers = [];
+    public readonly List<PamelloQueryOperatorDescriptor> Operators = [];
     
     public PamelloEntityQueryService(IServiceProvider services) {
         _services = services;
@@ -147,6 +76,11 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
             PamelloOutput.Write($"| {attribute.Operator} {attribute.Name}");
             if (attribute.Description is not null)
                 PamelloOutput.Write($"|   {attribute.Description}");
+            
+            Operators.Add(new PamelloQueryOperatorDescriptor(
+                attribute,
+                type
+            ));
         }
     }
     

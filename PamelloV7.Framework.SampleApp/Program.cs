@@ -11,6 +11,7 @@ using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
+using PamelloV7.Framework.PEQL.Operators;
 using PamelloV7.Framework.SampleApp.Entities;
 using PamelloV7.Framework.SampleApp.Repositories;
 using PamelloV7.Framework.SampleApp.Scope;
@@ -41,11 +42,11 @@ class Program
         await app.StartAsync();
         
         var peql = app.Services.GetRequiredService<IPamelloEntityQueryService>();
+        var multiplication = app.Services.GetRequiredService<PamelloQueryMultiplicationOperator>();
         
         Console.WriteLine("Items:");
-        var items = await "2,2,3".ConvertToTypeAsync<IEnumerable<Item>>(peql);
         
-        foreach (var item in items!) {
+        await foreach (var item in multiplication.Execute("items$1,2,3", "3")) {
             Console.WriteLine(item);
         }
 

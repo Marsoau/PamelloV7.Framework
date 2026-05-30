@@ -8,6 +8,8 @@ namespace PamelloV7.Framework.PEQL.Operators;
 [PamelloQueryOperator('*', "Multiplication", "Repeats query a specified number of times")]
 public partial class PamelloQueryMultiplicationOperator
 {
+    public PamelloQueryMultiplicationOperator(IServiceProvider services) : base(services) { }
+
     public override async IAsyncEnumerable<IPamelloBasicEntity> Execute(string query, PamelloQueryBlock arg) {
         var repeatCount = int.Parse(arg.Text);
 

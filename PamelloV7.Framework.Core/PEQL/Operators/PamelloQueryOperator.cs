@@ -9,6 +9,11 @@ public abstract class PamelloQueryOperator
     protected readonly IServiceProvider Services;
     
     protected IPamelloEntityQueryService PEQL => Services.GetRequiredService<IPamelloEntityQueryService>();
+
+    public PamelloQueryOperator(IServiceProvider services) {
+        Services = services;
+    }
+
     
     public abstract IAsyncEnumerable<IPamelloBasicEntity> Execute(string query, PamelloQueryBlock arg);
 }
