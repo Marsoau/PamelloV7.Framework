@@ -74,6 +74,8 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         //load modules here later
         
         EntityQueryLanguageLoader.LoadRepositories();
+        EntityQueryLanguageLoader.LoadOperators();
+        
         EntityQueryLanguageLoader.Configure(Services);
 
         if (_builder is WebApplicationBuilder webBuilder && Options.UseApi) {

@@ -2,8 +2,10 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using PamelloV7.Framework.App;
 using PamelloV7.Framework.Core.Logging;
+using PamelloV7.Framework.Core.PEQL.Attributes;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Repositories.Attributes;
+using PamelloV7.Framework.PEQL.Descriptors;
 
 namespace PamelloV7.Framework.PEQL.Loaders;
 
@@ -25,6 +27,8 @@ public class PamelloEntityQueryLanguageLoader
 
     public readonly List<Type> RepositoriesTypesToDrop = [];
     public readonly List<PamelloRepositoryDescriptor> RepositoriesDescriptors = [];
+    
+    public readonly List<PamelloQueryOperatorDescriptor> OperatorsDescriptors = [];
     
     public PamelloEntityQueryLanguageLoader(PamelloAppOptions options) {
         _options = options;
@@ -49,6 +53,26 @@ public class PamelloEntityQueryLanguageLoader
         }
     }
 
+    public void LoadOperators() {
+        PamelloOutput.Write("Loading operators");
+        var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes())
+            .Where(t => t.GetCustomAttributes().Any(a => a is PamelloQueryOperatorAttribute));
+        
+        foreach (var type in types) {
+            var attribute = type.GetCustomAttribute<PamelloQueryOperatorAttribute>();
+            if (attribute is null) continue;
+
+            PamelloOutput.Write($"| {attribute.Operator} {attribute.Name}");
+            if (attribute.Description is not null)
+                PamelloOutput.Write($"|   {attribute.Description}");
+            
+            OperatorsDescriptors.Add(new PamelloQueryOperatorDescriptor(
+                attribute,
+                type
+            ));
+        }
+    }
+
     public void Configure(IServiceCollection collection) {
         foreach (var repositoryType in RepositoriesDescriptors.Select(r => r.RepositoryType)) {
             collection.AddSingleton(repositoryType);
@@ -64,6 +88,10 @@ public class PamelloEntityQueryLanguageLoader
                 
                 collection.AddSingleton(interfaceType, services => services.GetRequiredService(repositoryType));
             }
+        }
+        
+        foreach (var operatorDescriptor in OperatorsDescriptors) {
+            collection.AddTransient(operatorDescriptor.Type);
         }
     }
 

@@ -24,20 +24,19 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
 {
     private readonly IServiceProvider _services;
     
-    private readonly PamelloEntityQueryLanguageLoader _entityQueryLanguageLoader;
+    private readonly PamelloEntityQueryLanguageLoader _loader;
     
     public readonly List<PamelloQueryProviderDescriptor> Providers = [];
-    public readonly List<PamelloQueryOperatorDescriptor> Operators = [];
     
     public PamelloEntityQueryService(IServiceProvider services) {
         _services = services;
         
-        _entityQueryLanguageLoader = services.GetRequiredService<PamelloEntityQueryLanguageLoader>();
+        _loader = services.GetRequiredService<PamelloEntityQueryLanguageLoader>();
     }
 
     public void Startup(IServiceProvider services) {
-        PamelloOutput.Write("Adding providers");
-        foreach (var repositoryDescriptor in _entityQueryLanguageLoader.RepositoriesDescriptors) {
+        PamelloOutput.Write("Discovering providers");
+        foreach (var repositoryDescriptor in _loader.RepositoriesDescriptors) {
             var repository = services.GetRequiredService(repositoryDescriptor.RepositoryType) as IPamelloRepository;
             if (repository is null) continue;
 
@@ -62,24 +61,6 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
                 repositoryDescriptor.Attribute.EntityType,
                 repository,
                 points
-            ));
-        }
-
-        PamelloOutput.Write("Adding operators");
-        var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes())
-            .Where(t => t.GetCustomAttributes().Any(a => a is PamelloQueryOperatorAttribute));
-        
-        foreach (var type in types) {
-            var attribute = type.GetCustomAttribute<PamelloQueryOperatorAttribute>();
-            if (attribute is null) continue;
-
-            PamelloOutput.Write($"| {attribute.Operator} {attribute.Name}");
-            if (attribute.Description is not null)
-                PamelloOutput.Write($"|   {attribute.Description}");
-            
-            Operators.Add(new PamelloQueryOperatorDescriptor(
-                attribute,
-                type
             ));
         }
     }

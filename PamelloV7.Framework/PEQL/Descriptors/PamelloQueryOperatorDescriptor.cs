@@ -8,14 +8,14 @@ namespace PamelloV7.Framework.PEQL.Descriptors;
 
 public class PamelloQueryOperatorDescriptor(
     PamelloQueryOperatorAttribute attribute,
-    Type operatorClassType
+    Type type
 )
 {
     public readonly PamelloQueryOperatorAttribute Attribute = attribute;
-    public readonly Type OperatorClassType = operatorClassType;
+    public readonly Type Type = type;
 
     public IAsyncEnumerable<IPamelloBasicEntity> Execute(string query, PamelloQueryBlock arg, IServiceProvider services) {
-        var instance = (PamelloQueryOperator)services.GetRequiredService(OperatorClassType);
+        var instance = (PamelloQueryOperator)services.GetRequiredService(Type);
         return instance.Execute(query, arg);
     }
 }
