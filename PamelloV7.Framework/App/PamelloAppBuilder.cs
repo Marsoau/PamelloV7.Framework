@@ -11,8 +11,8 @@ using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Context;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.Modules.Loaders;
+using PamelloV7.Framework.PEQL.Loaders;
 using PamelloV7.Framework.PEQL.Operators;
-using PamelloV7.Framework.Repositories.Loaders;
 using PamelloV7.Framework.Services.Loaders;
 
 namespace PamelloV7.Framework.App;
@@ -25,7 +25,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
     
     public readonly PamelloConfigLoader ConfigLoader;
     public readonly PamelloServiceLoader ServiceLoader;
-    public readonly PamelloRepositoriesLoader RepositoriesLoader;
+    public readonly PamelloEntityQueryLanguageLoader EntityQueryLanguageLoader;
     public readonly IPamelloModuleLoader ModuleLoader;
     
     public IDictionary<object, object> Properties => _builder.Properties;
@@ -40,7 +40,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         
         ConfigLoader = new PamelloConfigLoader(Options);
         ServiceLoader = new PamelloServiceLoader(Options);
-        RepositoriesLoader = new PamelloRepositoriesLoader(Options);
+        EntityQueryLanguageLoader = new PamelloEntityQueryLanguageLoader(Options);
         ModuleLoader = null!;
 
         _builder = Options.UseApi
@@ -56,7 +56,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         
         Services.AddSingleton(ConfigLoader);
         Services.AddSingleton(ServiceLoader);
-        Services.AddSingleton(RepositoriesLoader);
+        Services.AddSingleton(EntityQueryLanguageLoader);
 
         Services.AddSingleton(Services);
         
@@ -73,8 +73,8 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         
         //load modules here later
         
-        RepositoriesLoader.LoadRepositories();
-        RepositoriesLoader.Configure(Services);
+        EntityQueryLanguageLoader.LoadRepositories();
+        EntityQueryLanguageLoader.Configure(Services);
 
         if (_builder is WebApplicationBuilder webBuilder && Options.UseApi) {
             ConfigureForApi(webBuilder);

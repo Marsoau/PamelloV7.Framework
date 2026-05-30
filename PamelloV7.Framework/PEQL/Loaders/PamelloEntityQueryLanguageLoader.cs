@@ -5,13 +5,11 @@ using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Repositories.Attributes;
 
-namespace PamelloV7.Framework.Repositories.Loaders;
+namespace PamelloV7.Framework.PEQL.Loaders;
 
 public record PamelloRepositoryDescriptor(
     IPamelloRepositoryAttribute Attribute,
-    Type RepositoryType,
-    List<Type> Interfaces,
-    List<Type> GenericInterfaces
+    Type RepositoryType
 )
 {
     public bool IsDatabaseRepository => DatabaseAttribute is not null;
@@ -21,14 +19,14 @@ public record PamelloRepositoryDescriptor(
     public Type? EntityDtoType => Attribute.EntityType.GetNestedType("Dto");
 };
 
-public class PamelloRepositoriesLoader
+public class PamelloEntityQueryLanguageLoader
 {
     private readonly PamelloAppOptions _options;
 
     public readonly List<Type> RepositoriesTypesToDrop = [];
     public readonly List<PamelloRepositoryDescriptor> RepositoriesDescriptors = [];
     
-    public PamelloRepositoriesLoader(PamelloAppOptions options) {
+    public PamelloEntityQueryLanguageLoader(PamelloAppOptions options) {
         _options = options;
     }
     
@@ -46,9 +44,7 @@ public class PamelloRepositoriesLoader
             
             RepositoriesDescriptors.Add(new PamelloRepositoryDescriptor(
                 repositoryAttribute,
-                repositoryType,
-                [],
-                []
+                repositoryType
             ));
         }
     }
@@ -71,7 +67,7 @@ public class PamelloRepositoriesLoader
         }
     }
 
-    public void RegisterToDrop(Type repositoryType) {
+    public void RegisterRepositoryToDrop(Type repositoryType) {
         if (RepositoriesTypesToDrop.Contains(repositoryType)) return;
         
         RepositoriesTypesToDrop.Add(repositoryType);

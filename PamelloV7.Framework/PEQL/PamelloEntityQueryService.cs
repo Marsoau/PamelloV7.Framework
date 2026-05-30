@@ -13,7 +13,7 @@ using PamelloV7.Framework.Core.PEQL.Range;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
 using PamelloV7.Framework.PEQL.Descriptors;
-using PamelloV7.Framework.Repositories.Loaders;
+using PamelloV7.Framework.PEQL.Loaders;
 using PamelloV7.Framework.Shared.Entities.Base;
 using PamelloV7.Framework.Shared.Exceptions;
 using PamelloV7.Framework.Shared.Variants.Attributes;
@@ -24,7 +24,7 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
 {
     private readonly IServiceProvider _services;
     
-    private readonly PamelloRepositoriesLoader _repositoriesLoader;
+    private readonly PamelloEntityQueryLanguageLoader _entityQueryLanguageLoader;
     
     public readonly List<PamelloQueryProviderDescriptor> Providers = [];
     public readonly List<PamelloQueryOperatorDescriptor> Operators = [];
@@ -32,12 +32,12 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
     public PamelloEntityQueryService(IServiceProvider services) {
         _services = services;
         
-        _repositoriesLoader = services.GetRequiredService<PamelloRepositoriesLoader>();
+        _entityQueryLanguageLoader = services.GetRequiredService<PamelloEntityQueryLanguageLoader>();
     }
 
     public void Startup(IServiceProvider services) {
         PamelloOutput.Write("Adding providers");
-        foreach (var repositoryDescriptor in _repositoriesLoader.RepositoriesDescriptors) {
+        foreach (var repositoryDescriptor in _entityQueryLanguageLoader.RepositoriesDescriptors) {
             var repository = services.GetRequiredService(repositoryDescriptor.RepositoryType) as IPamelloRepository;
             if (repository is null) continue;
 

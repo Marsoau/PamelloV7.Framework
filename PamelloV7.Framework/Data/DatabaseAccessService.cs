@@ -5,7 +5,7 @@ using PamelloV7.Framework.Core.Data;
 using PamelloV7.Framework.Core.Entities.Dao;
 using PamelloV7.Framework.Core.Exceptions;
 using PamelloV7.Framework.Core.Repositories;
-using PamelloV7.Framework.Repositories.Loaders;
+using PamelloV7.Framework.PEQL.Loaders;
 using PamelloV7.Framework.Shared.Exceptions;
 
 namespace PamelloV7.Framework.Data;
@@ -14,14 +14,14 @@ public class DatabaseAccessService : IDatabaseAccessService
 {
     private readonly IServiceProvider _services;
     
-    private readonly PamelloRepositoriesLoader _repositoriesLoader;
+    private readonly PamelloEntityQueryLanguageLoader _entityQueryLanguageLoader;
         
     private readonly LiteDatabase _db;
     
     public DatabaseAccessService(IServiceProvider services) {
         _services = services;
         
-        _repositoriesLoader = services.GetRequiredService<PamelloRepositoriesLoader>();
+        _entityQueryLanguageLoader = services.GetRequiredService<PamelloEntityQueryLanguageLoader>();
         
         var options = services.GetRequiredService<PamelloAppOptions>();
         
@@ -42,7 +42,7 @@ public class DatabaseAccessService : IDatabaseAccessService
     }
     
     public IDatabaseCollection<PamelloBasicDao>? GetCollectionOfEntity(Type entityType) {
-        var repositoryDescriptor = _repositoriesLoader.RepositoriesDescriptors
+        var repositoryDescriptor = _entityQueryLanguageLoader.RepositoriesDescriptors
             .FirstOrDefault(repo =>
                 repo.Attribute.EntityType == entityType && repo.IsDatabaseRepository
             );

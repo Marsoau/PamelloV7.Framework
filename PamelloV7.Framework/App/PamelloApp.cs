@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.PEQL;
-using PamelloV7.Framework.Repositories.Loaders;
+using PamelloV7.Framework.PEQL.Loaders;
 using PamelloV7.Framework.Services.Loaders;
 using PamelloV7.Framework.Shared.Entities.Containers;
 using PamelloV7.Framework.Shared.Variants.Attributes;
@@ -41,7 +41,7 @@ public partial class PamelloApp : IHost
     }
     
     public Task StartAsync(CancellationToken cancellationToken = default) {
-        var repositoriesLoader = Services.GetRequiredService<PamelloRepositoriesLoader>();
+        var repositoriesLoader = Services.GetRequiredService<PamelloEntityQueryLanguageLoader>();
         var servicesLoader = Services.GetRequiredService<PamelloServiceLoader>();
         
         var entityQueryService = Services.GetRequiredService<IPamelloEntityQueryService>();
