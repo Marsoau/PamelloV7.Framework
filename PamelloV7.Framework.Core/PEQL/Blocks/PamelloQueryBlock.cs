@@ -12,7 +12,7 @@ public enum QueryStringBlockKind
     InSingleQuotes,
 }
 
-public record QueryStringBlock(
+public record PamelloQueryBlock(
     int Position,
     string Text,
     QueryStringBlockKind Kind

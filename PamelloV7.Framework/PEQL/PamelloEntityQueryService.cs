@@ -8,6 +8,7 @@ using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.Core.PEQL.Attributes;
 using PamelloV7.Framework.Core.PEQL.Blocks;
+using PamelloV7.Framework.Core.PEQL.Operators;
 using PamelloV7.Framework.Core.PEQL.Range;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
@@ -133,6 +134,19 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
                 repository,
                 points
             ));
+        }
+
+        PamelloOutput.Write("Adding operators");
+        var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes())
+            .Where(t => t.GetCustomAttributes().Any(a => a is PamelloQueryOperatorAttribute));
+        
+        foreach (var type in types) {
+            var attribute = type.GetCustomAttribute<PamelloQueryOperatorAttribute>();
+            if (attribute is null) continue;
+
+            PamelloOutput.Write($"| {attribute.Operator} {attribute.Name}");
+            if (attribute.Description is not null)
+                PamelloOutput.Write($"|   {attribute.Description}");
         }
     }
     

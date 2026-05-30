@@ -15,14 +15,14 @@ public static class StringBlocksExtensions
 
     record DelimiterPosition(int Position, DelimiterPair Delimiter);
     
-    public static IEnumerable<QueryStringBlock> EnumerateStringBlocks(
+    public static IEnumerable<PamelloQueryBlock> EnumerateStringBlocks(
         this string query,
         char[]? operators = null,
         bool ignoreDelimiters = false
     ) {
         operators ??= [];
         
-        QueryStringBlock? lastBlock = null;
+        PamelloQueryBlock? lastBlock = null;
 
         List<DelimiterPosition> openedDelimiters = [];
         
@@ -48,7 +48,7 @@ public static class StringBlocksExtensions
             
             if (TryCreateTextBlockAt(i - 1) is { } blockBeforeOperator) yield return blockBeforeOperator;
                 
-            yield return lastBlock = new QueryStringBlock(
+            yield return lastBlock = new PamelloQueryBlock(
                 i,
                 $"{query[i]}",
                 QueryStringBlockKind.Operator
@@ -63,20 +63,20 @@ public static class StringBlocksExtensions
             ? lastBlock.Position + lastBlock.Text.Length + (lastBlock.Kind > QueryStringBlockKind.Operator ? 2 : 0)
             : 0;
 
-        QueryStringBlock? TryCreateTextBlockAt(int position) {
+        PamelloQueryBlock? TryCreateTextBlockAt(int position) {
             if (openedDelimiters.Count > 0) return null;
             
             var lastPosition = LastBlockEndPosition();
             if (position < lastPosition) return null;
             
-            return lastBlock = new QueryStringBlock(
+            return lastBlock = new PamelloQueryBlock(
                 lastPosition,
                 query[lastPosition..(position + 1)],
                 QueryStringBlockKind.Text
             );
         }
 
-        QueryStringBlock? TryDelimiterBlockAt(int i) {
+        PamelloQueryBlock? TryDelimiterBlockAt(int i) {
             if (ignoreDelimiters) return null;
 
             if (openedDelimiters.LastOrDefault() is { } lastOpenedDelimiter
@@ -85,7 +85,7 @@ public static class StringBlocksExtensions
                 openedDelimiters.RemoveAt(openedDelimiters.Count - 1);
                 if (openedDelimiters.Count != 0) return null;
                 
-                return new QueryStringBlock(
+                return new PamelloQueryBlock(
                     lastOpenedDelimiter.Position,
                     query[(lastOpenedDelimiter.Position + 1)..i],
                     query[i].GetKind()
@@ -99,13 +99,13 @@ public static class StringBlocksExtensions
         }
     }
 
-    public static IEnumerable<QueryStringBlock> ToSingleBlocksAround(
-        this IEnumerable<QueryStringBlock> blocks,
-        Predicate<QueryStringBlock> predicate,
+    public static IEnumerable<PamelloQueryBlock> ToSingleBlocksAround(
+        this IEnumerable<PamelloQueryBlock> blocks,
+        Predicate<PamelloQueryBlock> predicate,
         int maxItems = int.MaxValue,
         bool isBackward = false
     ) {
-        List<QueryStringBlock> currentBlocks = [];
+        List<PamelloQueryBlock> currentBlocks = [];
 
         var leftToReturn = maxItems;
         
@@ -132,12 +132,12 @@ public static class StringBlocksExtensions
         if (leftToReturn > 0 && currentBlocks.ToSingleBlock() is { } lastBlock) yield return lastBlock;
     }
     
-    public static QueryStringBlock? ToSingleBlock(this IEnumerable<QueryStringBlock> blocks, bool dedupe = false) {
+    public static PamelloQueryBlock? ToSingleBlock(this IEnumerable<PamelloQueryBlock> blocks, bool dedupe = false) {
         var blocksList = blocks.ToList();
         
         switch (blocksList.Count) {
             case 0: return null;
-            case > 1: return new QueryStringBlock(
+            case > 1: return new PamelloQueryBlock(
                 blocksList.First().Position,
                 string.Join("", blocksList.Select(b => b.ToOriginalString())),
                 QueryStringBlockKind.Text
