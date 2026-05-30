@@ -127,6 +127,8 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
             ? GetProviderByQuery(providerQuery) ?? throw new PamelloException($"No provider found by provider query \"{providerQuery}\"")
             : GetProviderForEntityType<TPamelloEntity>() ?? throw new PamelloException($"No provider found for entity type {typeof(TPamelloEntity).Name}");
         
+        providerQuery ??= provider.Name;
+        
         //
         //id
         //
