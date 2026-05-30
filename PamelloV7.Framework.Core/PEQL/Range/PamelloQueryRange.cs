@@ -9,9 +9,17 @@ public class PamelloQueryRange
     
     public string EndValue { get; set; }
     public int EndNumber => int.Parse(EndValue);
+
+    public bool IsEndJustCopied { get; private set; }
     
     public bool IsPurelyNumeric => int.TryParse(StartValue, out _) && int.TryParse(EndValue, out _);
 
+    public PamelloQueryRange(string startValue) {
+        StartValue = startValue;
+        EndValue = StartValue;
+        
+        IsEndJustCopied = true;
+    }
     public PamelloQueryRange(string startValue, string endValue) {
         StartValue = startValue;
         EndValue = endValue;
@@ -34,12 +42,9 @@ public class PamelloQueryRange
             .ToSingleBlocksAround(b => b.Kind == QueryStringBlockKind.Operator)
             .ToList();
         
-        return new PamelloQueryRange(
-            blocks[0].Text,
-            blocks.Count == 1
-                ? blocks[0].Text
-                : blocks[1].Text
-        );
+        return blocks.Count == 1
+            ? new PamelloQueryRange(blocks[0].Text)
+            : new PamelloQueryRange(blocks[0].Text, blocks[1].Text);
     }
 
     public IEnumerable<int> EnumerateNumericRange() {
