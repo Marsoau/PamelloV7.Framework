@@ -105,16 +105,21 @@ public static class StringBlocksExtensions
         PamelloQueryBlock? Right
     ) ToBlocksPairAround(
         this IEnumerable<PamelloQueryBlock> blocks,
-        Predicate<PamelloQueryBlock> predicate
+        Predicate<PamelloQueryBlock> predicate,
+        bool isBackward = false
     ) {
         PamelloQueryBlock? target = null;
         var targetSeparatedBlocks = blocks.ToSingleBlocksAround(block => {
             if (!predicate(block)) return false;
             
-            target = block;
+            target ??= block;
             
             return true;
-        }, 2, true).Reverse().ToList();
+        }, 2, isBackward);
+        
+        if (isBackward) targetSeparatedBlocks = targetSeparatedBlocks.Reverse();
+        
+        targetSeparatedBlocks = targetSeparatedBlocks.ToList();
 
         return (
             target,
