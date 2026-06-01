@@ -13,7 +13,6 @@ public abstract class PamelloQueryOperator
     public PamelloQueryOperator(IServiceProvider services) {
         Services = services;
     }
-
     
     public abstract IAsyncEnumerable<IPamelloBasicEntity> Execute(string query, PamelloQueryBlock? arg);
 }
