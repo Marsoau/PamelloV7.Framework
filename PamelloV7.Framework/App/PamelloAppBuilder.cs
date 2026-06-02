@@ -11,6 +11,7 @@ using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Context;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.Modules.Loaders;
+using PamelloV7.Framework.PEQL.Filters;
 using PamelloV7.Framework.PEQL.Loaders;
 using PamelloV7.Framework.PEQL.Operators;
 using PamelloV7.Framework.Services.Loaders;
@@ -51,8 +52,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
     public void Configure(Action<PamelloAppOptions>? editOptionsAfterConfig = null) {
         Services.AddSingleton(Options);
         
-        //todo replace with actual PEQL loader that will load operators, filters, and probably repositories too instead of repositories loader
-        Services.AddTransient<PamelloQueryMultiplicationOperator>();
+        Services.AddTransient<PamelloQueryTestFilter>();
         
         Services.AddSingleton(ConfigLoader);
         Services.AddSingleton(ServiceLoader);

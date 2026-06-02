@@ -6,14 +6,14 @@ using PamelloV7.Framework.Shared.Entities.Base;
 
 namespace PamelloV7.Framework.Core.PEQL.Filters;
 
-public abstract class PamelloQueryFilter
+public abstract class PamelloQueryFilter(IServiceProvider services)
 {
-    protected readonly IServiceProvider Services;
+    protected readonly IServiceProvider Services = services;
     
     protected IPamelloEntityQueryService PEQL => Services.GetRequiredService<IPamelloEntityQueryService>();
 
-    public PamelloQueryFilter(IServiceProvider services) {
-        Services = services;
+    public IAsyncEnumerable<IPamelloBasicEntity> Entities {
+        set; get => field ?? throw new InvalidOperationException("Filter entities not set");
     }
 
     public async IAsyncEnumerable<IPamelloBasicEntity> ExecuteByArgsAsync(string query, PamelloQueryBlock? arg) {

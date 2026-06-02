@@ -11,6 +11,7 @@ using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.Core.Repositories;
 using PamelloV7.Framework.Core.Scope;
+using PamelloV7.Framework.PEQL.Filters;
 using PamelloV7.Framework.PEQL.Operators;
 using PamelloV7.Framework.SampleApp.Entities;
 using PamelloV7.Framework.SampleApp.Repositories;
@@ -43,9 +44,11 @@ class Program
         
         var peql = app.Services.GetRequiredService<IPamelloEntityQueryService>();
         
+        var test = app.Services.GetRequiredService<PamelloQueryTestFilter>();
+        
         Console.WriteLine("Items:");
         
-        await foreach (var item in peql.GetAsync<Item>("(3,2,1):random*3")) {
+        await foreach (var item in test.Execute("items$1,2,3", "1")) {
             Console.WriteLine(item);
         }
 
