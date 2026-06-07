@@ -9,10 +9,8 @@ namespace PamelloV7.Framework.PEQL.Operators;
 [PamelloQueryOperator(':', "Indexation", "Get entity at a specified positions range")]
 public partial class PamelloQueryIndexationOperator
 {
-    public PamelloQueryIndexationOperator(IServiceProvider services) : base(services) { }
-    
-    public override async IAsyncEnumerable<IPamelloBasicEntity> Execute(string query, PamelloQueryBlock? arg) {
-        var result = await PEQL.GetAsync(query).ToListAsync();
+    public override async IAsyncEnumerable<IPamelloBasicEntity> Execute(PamelloQueryBlock? arg) {
+        var result = await GetEntities().ToListAsync();
 
         var range = result.GetRange(result.Count, PamelloQueryRange.Parse(arg?.Text ?? ""));
         

@@ -13,9 +13,4 @@ public class PamelloQueryOperatorDescriptor(
 {
     public readonly PamelloQueryOperatorAttribute Attribute = attribute;
     public readonly Type Type = type;
-
-    public IAsyncEnumerable<IPamelloBasicEntity> Execute(string query, PamelloQueryBlock arg, IServiceProvider services) {
-        var instance = (PamelloQueryOperator)services.GetRequiredService(Type);
-        return instance.Execute(query, arg);
-    }
 }

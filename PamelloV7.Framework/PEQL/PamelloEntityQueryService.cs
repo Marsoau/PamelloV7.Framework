@@ -167,10 +167,9 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
             : null;
 
         if (peqlOperator is not null && peqlOperatorDescriptor is not null) {
-            var entities = peqlOperator.Execute(
-                $"{providerQuery}${result.Left?.Text}",
-                result.Right
-            );
+            peqlOperator.InitializeQueryActions(_services, $"{providerQuery}${result.Left?.Text}");
+            
+            var entities = peqlOperator.Execute(result.Right);
 
             await foreach (var entity in entities.OfType<TPamelloEntity>()) {
                 yield return entity;
