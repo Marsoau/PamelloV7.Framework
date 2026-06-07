@@ -75,6 +75,7 @@ public class PamelloAppBuilder : IHostApplicationBuilder
         
         EntityQueryLanguageLoader.LoadRepositories();
         EntityQueryLanguageLoader.LoadOperators();
+        EntityQueryLanguageLoader.LoadFilters();
         
         EntityQueryLanguageLoader.Configure(Services);
 

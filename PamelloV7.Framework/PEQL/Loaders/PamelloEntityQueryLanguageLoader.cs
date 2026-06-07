@@ -29,6 +29,7 @@ public class PamelloEntityQueryLanguageLoader
     public readonly List<PamelloRepositoryDescriptor> RepositoriesDescriptors = [];
     
     public readonly List<PamelloQueryOperatorDescriptor> OperatorsDescriptors = [];
+    public readonly List<PamelloQueryFilterDescriptor> FiltersDescriptors = [];
     
     public PamelloEntityQueryLanguageLoader(PamelloAppOptions options) {
         _options = options;
@@ -67,6 +68,26 @@ public class PamelloEntityQueryLanguageLoader
                 PamelloOutput.Write($"|   {attribute.Description}");
             
             OperatorsDescriptors.Add(new PamelloQueryOperatorDescriptor(
+                attribute,
+                type
+            ));
+        }
+    }
+    
+    public void LoadFilters() {
+        PamelloOutput.Write("Loading filters");
+        var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes())
+            .Where(t => t.GetCustomAttributes().Any(a => a is PamelloQueryFilterAttribute));
+        
+        foreach (var type in types) {
+            var attribute = type.GetCustomAttribute<PamelloQueryFilterAttribute>();
+            if (attribute is null) continue;
+
+            PamelloOutput.Write($"| {attribute.Name}");
+            if (attribute.Description is not null)
+                PamelloOutput.Write($"|   {attribute.Description}");
+            
+            FiltersDescriptors.Add(new PamelloQueryFilterDescriptor(
                 attribute,
                 type
             ));
