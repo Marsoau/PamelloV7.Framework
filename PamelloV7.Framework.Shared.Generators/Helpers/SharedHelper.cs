@@ -83,25 +83,34 @@ public static class SharedHelper
             sb.AppendLine(";");
             sb.AppendLine();
         }
-        
-        sb.Append($"{Tab(tabs)}{GetTypeModifiers(classTypes[depth])} class {classTypes[depth].Name} ");
-        
+    
+        var namedType = classTypes[depth] as INamedTypeSymbol;
+        var typeParams = namedType?.TypeParameters.Length > 0
+            ? $"<{string.Join(", ", namedType.TypeParameters.Select(tp => tp.Name))}>"
+            : "";
+        var constraints = namedType?.TypeParameters.Length > 0
+            ? string.Join(" ", namedType.TypeParameters.Select(GetFullyQualifiedConstraints).Where(c => c.Length > 0))
+            : "";
+    
+        sb.Append($"{Tab(tabs)}{GetTypeModifiers(classTypes[depth])} class {classTypes[depth].Name}{typeParams} ");
+    
         if (depth + 1 >= classTypes.Length) {
-            sb.AppendLine($"{inheritancePart}{(
-                inheritancePart.Length == 0 || inheritancePart.LastOrDefault() != ' ' ? " {" : "{"
+            var combined = inheritancePart + (constraints.Length > 0 ? $"{constraints} " : "");
+            sb.AppendLine($"{combined}{(
+                combined.Length == 0 || combined.LastOrDefault() != ' ' ? " {" : "{"
             )}");
 
             sb.Append(Tab(tabs + 1));
             sb.AppendLine(innerPart.Replace("\n", $"\n{Tab(tabs + 1)}"));
-            
+        
             sb.AppendLine($"{Tab(tabs)}}}");
             return;
         }
 
-        sb.AppendLine($"{{");
+        sb.AppendLine(constraints.Length > 0 ? $"{constraints} {{" : $"{{");
         WriteInsideType(classTypes, inheritancePart, innerPart, false, sb, tabs + 1, depth + 1);
         sb.AppendLine($"{Tab(tabs)}}}");
-        
+    
         if (useBodyNamespace) {
             sb.AppendLine($"{Tab(tabs - 1)}}}");
         }

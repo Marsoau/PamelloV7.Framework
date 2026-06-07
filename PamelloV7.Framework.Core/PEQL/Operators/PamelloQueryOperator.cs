@@ -5,8 +5,14 @@ using PamelloV7.Framework.Shared.Entities.Base;
 
 namespace PamelloV7.Framework.Core.PEQL.Operators;
 
-public abstract class PamelloQueryOperator : PamelloQueryActions
+public interface IPamelloQueryOperator<out TPamelloEntity> : IPamelloQueryActions<TPamelloEntity>
 {
-    public abstract IAsyncEnumerable<IPamelloBasicEntity> Execute(PamelloQueryBlock? arg);
+    IAsyncEnumerable<TPamelloEntity> Execute(PamelloQueryBlock? arg);
+}
+
+public abstract class PamelloQueryOperator<TPamelloEntity> : PamelloQueryActions<TPamelloEntity>, IPamelloQueryOperator<TPamelloEntity>
+    where TPamelloEntity : class, IPamelloBasicEntity
+{
+    public abstract IAsyncEnumerable<TPamelloEntity> Execute(PamelloQueryBlock? arg);
 }
 

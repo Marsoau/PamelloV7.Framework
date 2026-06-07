@@ -163,7 +163,7 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
             : null;
         
         var peqlOperator = peqlOperatorDescriptor is not null
-            ? (PamelloQueryOperator)_services.GetRequiredService(peqlOperatorDescriptor.Type)
+            ? (IPamelloQueryOperator<IPamelloBasicEntity>)_services.GetRequiredService(peqlOperatorDescriptor.Type)
             : null;
 
         if (peqlOperator is not null && peqlOperatorDescriptor is not null) {

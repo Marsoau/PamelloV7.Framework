@@ -8,9 +8,16 @@ using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.Core.PEQL.Filters;
 
-public abstract partial class PamelloQueryFilter : PamelloQueryActions
+public interface IPamelloQueryFilter<out TPamelloEntity> : IPamelloQueryActions<TPamelloEntity>
+    where TPamelloEntity : class, IPamelloBasicEntity
 {
-    public async IAsyncEnumerable<IPamelloBasicEntity> ExecuteByArgsAsync(PamelloQueryBlock? arg) {
+    public IAsyncEnumerable<TPamelloEntity> ExecuteByArgsAsync(PamelloQueryBlock? arg);
+}
+
+public abstract partial class PamelloQueryFilter<TPamelloEntity> : PamelloQueryActions<TPamelloEntity>, IPamelloQueryFilter<TPamelloEntity>
+    where TPamelloEntity : class, IPamelloBasicEntity
+{
+    public async IAsyncEnumerable<TPamelloEntity> ExecuteByArgsAsync(PamelloQueryBlock? arg) {
         var executeMethod = GetType().GetMethod("Execute")!;
         
         var peql = Services.GetRequiredService<IPamelloEntityQueryService>();
@@ -21,7 +28,7 @@ public abstract partial class PamelloQueryFilter : PamelloQueryActions
             peql
         ).ToArrayAsync();
 
-        await foreach (var entity in (IAsyncEnumerable<IPamelloBasicEntity>)executeMethod.Invoke(this, arguments)!) {
+        await foreach (var entity in (IAsyncEnumerable<TPamelloEntity>)executeMethod.Invoke(this, arguments)!) {
             yield return entity;
         };
     }

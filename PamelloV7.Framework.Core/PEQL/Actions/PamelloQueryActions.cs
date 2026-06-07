@@ -4,31 +4,47 @@ using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.Core.PEQL.Actions;
 
-public abstract partial class PamelloQueryActions : PamelloBasicActions
+public interface IPamelloQueryActions<out TPamelloEntity>
 {
-    private Func<IAsyncEnumerable<IPamelloBasicEntity>> _getEntities = () => Enumerable.Empty<IPamelloBasicEntity>().ToAsyncEnumerable();
+    void InitializeQueryActions(IServiceProvider services, string query);
+    void InitializeQueryActions(IServiceProvider services, IEnumerable<IPamelloBasicEntity> entities);
+    void InitializeQueryActions(IServiceProvider services, IAsyncEnumerable<IPamelloBasicEntity> entities);
+    void InitializeQueryActions(IServiceProvider services, Func<IAsyncEnumerable<IPamelloBasicEntity>> entities);
     
-    private static Func<IAsyncEnumerable<IPamelloBasicEntity>> FuncFromEnumerable<T>(IEnumerable<T> enumerable)
-        where T : class, IPamelloBasicEntity
-        => enumerable.ToAsyncEnumerable;
+    IAsyncEnumerable<TPamelloEntity> GetEntities();
+}
+
+public abstract partial class PamelloQueryActions<TPamelloEntity> : PamelloBasicActions, IPamelloQueryActions<TPamelloEntity>
+    where TPamelloEntity : class, IPamelloBasicEntity
+{
+    private Func<IAsyncEnumerable<TPamelloEntity>> _getEntities = () => Enumerable.Empty<TPamelloEntity>().ToAsyncEnumerable();
     
-    private static Func<IAsyncEnumerable<IPamelloBasicEntity>> FuncFromAsyncEnumerable<T>(IAsyncEnumerable<T> asyncEnumerable)
-        where T : class, IPamelloBasicEntity
-        => () => asyncEnumerable;
+    private static Func<IAsyncEnumerable<TPamelloEntity>> FuncFromAsyncBasicFunc(Func<IAsyncEnumerable<IPamelloBasicEntity>> getBasicEntitiesAsync)
+        => () => getBasicEntitiesAsync().OfType<TPamelloEntity>();
+    private static Func<IAsyncEnumerable<TPamelloEntity>> FuncFromBasicFunc(Func<IEnumerable<IPamelloBasicEntity>> getBasicEntities)
+        => () => getBasicEntities().OfType<TPamelloEntity>().ToAsyncEnumerable();
     
-    private Func<IAsyncEnumerable<IPamelloBasicEntity>> FuncFromQuery(string query) => () => PEQL.GetAsync(query);
+    private static Func<IAsyncEnumerable<TPamelloEntity>> FuncFromEnumerable(IEnumerable<IPamelloBasicEntity> enumerable)
+        => () => enumerable.OfType<TPamelloEntity>().ToAsyncEnumerable();
+    
+    private static Func<IAsyncEnumerable<TPamelloEntity>> FuncFromAsyncEnumerable(IAsyncEnumerable<IPamelloBasicEntity> asyncEnumerable)
+        => asyncEnumerable.OfType<TPamelloEntity>;
+    
+    private Func<IAsyncEnumerable<TPamelloEntity>> FuncFromQuery(string query) => () => PEQL.GetAsync<TPamelloEntity>(query);
 
     public void InitializeQueryActions(
         IServiceProvider services,
         [Variant(nameof(FuncFromQuery))]
         [Variant(nameof(FuncFromEnumerable))]
         [Variant(nameof(FuncFromAsyncEnumerable))]
-        Func<IAsyncEnumerable<IPamelloBasicEntity>>? getEntities = null
+        [Variant(nameof(FuncFromAsyncBasicFunc))]
+        [Variant(nameof(FuncFromBasicFunc))]
+        Func<IAsyncEnumerable<TPamelloEntity>>? getEntities = null
     ) {
         InitializeActions(services);
         
         _getEntities = getEntities ?? _getEntities;
     }
-    
-    public IAsyncEnumerable<IPamelloBasicEntity> GetEntities() => _getEntities();
+
+    public IAsyncEnumerable<TPamelloEntity> GetEntities() => _getEntities();
 }

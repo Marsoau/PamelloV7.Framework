@@ -3,6 +3,7 @@ using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.Core.PEQL.Attributes;
 using PamelloV7.Framework.Core.PEQL.Blocks;
 using PamelloV7.Framework.Core.PEQL.Filters;
+using PamelloV7.Framework.Core.PEQL.Operators;
 using PamelloV7.Framework.PEQL.Loaders;
 using PamelloV7.Framework.Shared.Entities.Base;
 using PamelloV7.Framework.Shared.Exceptions;
@@ -10,7 +11,7 @@ using PamelloV7.Framework.Shared.Exceptions;
 namespace PamelloV7.Framework.PEQL.Operators;
 
 [PamelloQueryOperator('#', "Filter", "Filter entities by a specified filter")]
-public partial class PamelloQueryFilterOperator
+public partial class PamelloQueryFilterOperator : PamelloQueryOperator<IPamelloBasicEntity>
 {
     public override IAsyncEnumerable<IPamelloBasicEntity> Execute(PamelloQueryBlock? arg) {
         if (arg is null) throw new PamelloException("Filter argument is null");
@@ -19,15 +20,12 @@ public partial class PamelloQueryFilterOperator
             .EnumerateStringBlocks()
             .CompressBlocksToMaxOf(2, true)
             .ToList();
-        
-        var (filterName, filterArgs) = (
-            filterNameAndArgs.Count == 2
-                ? filterNameAndArgs[1]
-                : filterNameAndArgs[0],
-            filterNameAndArgs is [{ Kind: QueryStringBlockKind.InParentheses }, _]
-                ? filterNameAndArgs[0]
-                : null
-        );
+
+        var (filterName, filterArgs) = filterNameAndArgs switch {
+            [{ Kind: QueryStringBlockKind.InParentheses }, _] => (filterNameAndArgs[1], filterNameAndArgs[0]),
+            [{ Kind: QueryStringBlockKind.InDoubleQuotes }] => ("name", $"*{filterNameAndArgs[0].Text}*"),
+            _ => (filterNameAndArgs[0], null)
+        };
         
         var loader = Services.GetRequiredService<PamelloEntityQueryLanguageLoader>();
 
@@ -36,7 +34,7 @@ public partial class PamelloQueryFilterOperator
         );
         if (peqlFilterDescriptor is null) throw new PamelloException($"Filter \"{filterName}\" not found by filter query \"{arg}\"");
         
-        var filter = (PamelloQueryFilter)Services.GetRequiredService(peqlFilterDescriptor.Type);
+        var filter = (IPamelloQueryFilter<IPamelloBasicEntity>)Services.GetRequiredService(peqlFilterDescriptor.Type);
         
         filter.InitializeQueryActions(Services, GetEntities);
         

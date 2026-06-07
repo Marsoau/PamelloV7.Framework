@@ -5,8 +5,6 @@ namespace PamelloV7.Framework.Core.PEQL.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
 
-[AutoInherit(typeof(PamelloQueryOperator), [])]
-
 public class PamelloQueryOperatorAttribute : Attribute
 {
     public char Operator { get; }
