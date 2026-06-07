@@ -10,11 +10,15 @@ namespace PamelloV7.Framework.Core.PEQL.Attributes;
 
 public class PamelloQueryFilterAttribute : Attribute
 {
-    public string Name { get; }
+    public string[] Names { get; set; }
+    
     public string? Description { get; }
     
-    public PamelloQueryFilterAttribute(string name, string? description = null) {
-        Name = name;
+    public PamelloQueryFilterAttribute(string name, string? description = null) : this([name], description) { }
+    public PamelloQueryFilterAttribute(string[] names, string? description = null) {
+        Names = names;
         Description = description;
     }
+    
+    public override string ToString() => string.Join(", ", Names);
 }

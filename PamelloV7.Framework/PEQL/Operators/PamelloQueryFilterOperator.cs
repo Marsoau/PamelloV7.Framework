@@ -16,7 +16,7 @@ public partial class PamelloQueryFilterOperator
         var loader = Services.GetRequiredService<PamelloEntityQueryLanguageLoader>();
 
         var peqlFilterDescriptor = loader.FiltersDescriptors.FirstOrDefault(o =>
-            o.Attribute.Name == arg?.Text
+            o.Attribute.Names.Contains(arg?.Text)
         );
         if (peqlFilterDescriptor is null) throw new PamelloException($"Filter \"{arg?.Text}\" not found");
         

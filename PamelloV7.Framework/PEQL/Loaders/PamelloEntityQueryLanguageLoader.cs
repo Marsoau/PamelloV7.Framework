@@ -83,7 +83,7 @@ public class PamelloEntityQueryLanguageLoader
             var attribute = type.GetCustomAttribute<PamelloQueryFilterAttribute>();
             if (attribute is null) continue;
 
-            PamelloOutput.Write($"| {attribute.Name}");
+            PamelloOutput.Write($"| {attribute}");
             if (attribute.Description is not null)
                 PamelloOutput.Write($"|   {attribute.Description}");
             
