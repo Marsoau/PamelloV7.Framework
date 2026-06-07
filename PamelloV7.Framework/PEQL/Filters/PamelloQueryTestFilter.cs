@@ -12,7 +12,7 @@ public partial class PamelloQueryTestFilter
     public PamelloQueryTestFilter(IServiceProvider services) : base(services) { }
     
     public async IAsyncEnumerable<IPamelloBasicEntity> Execute() {
-        await foreach (var entity in Entities)
+        await foreach (var entity in GetEntities())
             yield return entity;
     }
 }

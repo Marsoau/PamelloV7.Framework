@@ -43,12 +43,13 @@ class Program
         await app.StartAsync();
         
         var peql = app.Services.GetRequiredService<IPamelloEntityQueryService>();
+        var filter = app.Services.GetRequiredService<PamelloQueryTestFilter>();
         
-        var test = app.Services.GetRequiredService<PamelloQueryTestFilter>();
+        filter.InitializeFilter(app.Services, "items$2,2,1,3,3");
         
         Console.WriteLine("Items:");
         
-        await foreach (var item in test.Execute("items$1,2,3", "1")) {
+        await foreach (var item in filter.Execute()) {
             Console.WriteLine(item);
         }
 
