@@ -7,7 +7,7 @@ using PamelloV7.Framework.Shared.Entities.Base;
 namespace PamelloV7.Framework.PEQL.Operators;
 
 [PamelloQueryOperator('*', "Multiplication", "Repeats query a specified number of times")]
-public partial class PamelloQueryMultiplicationOperator : PamelloQueryOperator<IPamelloBasicEntity>
+public partial class PamelloQueryMultiplicationOperator
 {
     public override async IAsyncEnumerable<IPamelloBasicEntity> Execute(PamelloQueryBlock? arg) {
         var repeatCount = int.Parse(arg?.Text ?? "nonumber");

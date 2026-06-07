@@ -7,10 +7,10 @@ using PamelloV7.Framework.Shared.Entities.Base;
 namespace PamelloV7.Framework.PEQL.Descriptors;
 
 public class PamelloQueryFilterDescriptor(
-    PamelloQueryFilterAttribute attribute,
+    IPamelloQueryFilterAttribute attribute,
     Type type
 )
 {
-    public readonly PamelloQueryFilterAttribute Attribute = attribute;
+    public readonly IPamelloQueryFilterAttribute Attribute = attribute;
     public readonly Type Type = type;
 }

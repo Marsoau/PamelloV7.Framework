@@ -8,7 +8,7 @@ using PamelloV7.Framework.Shared.Entities.Base;
 namespace PamelloV7.Framework.PEQL.Operators;
 
 [PamelloQueryOperator(':', "Indexation", "Get entity at a specified positions range")]
-public partial class PamelloQueryIndexationOperator : PamelloQueryOperator<IPamelloBasicEntity>
+public partial class PamelloQueryIndexationOperator
 {
     public override async IAsyncEnumerable<IPamelloBasicEntity> Execute(PamelloQueryBlock? arg) {
         var result = await GetEntities().ToListAsync();

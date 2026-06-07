@@ -11,7 +11,7 @@ using PamelloV7.Framework.Shared.Exceptions;
 namespace PamelloV7.Framework.PEQL.Operators;
 
 [PamelloQueryOperator('#', "Filter", "Filter entities by a specified filter")]
-public partial class PamelloQueryFilterOperator : PamelloQueryOperator<IPamelloBasicEntity>
+public partial class PamelloQueryFilterOperator
 {
     public override IAsyncEnumerable<IPamelloBasicEntity> Execute(PamelloQueryBlock? arg) {
         if (arg is null) throw new PamelloException("Filter argument is null");

@@ -57,10 +57,10 @@ public class PamelloEntityQueryLanguageLoader
     public void LoadOperators() {
         PamelloOutput.Write("Loading operators");
         var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes())
-            .Where(t => t.GetCustomAttributes().Any(a => a is PamelloQueryOperatorAttribute));
+            .Where(t => t.GetCustomAttributes().Any(a => a is IPamelloQueryOperatorAttribute));
         
         foreach (var type in types) {
-            var attribute = type.GetCustomAttribute<PamelloQueryOperatorAttribute>();
+            var attribute = type.GetCustomAttributes().OfType<IPamelloQueryOperatorAttribute>().FirstOrDefault();
             if (attribute is null) continue;
 
             PamelloOutput.Write($"| {attribute.Operator} {attribute.Name}");
@@ -77,10 +77,10 @@ public class PamelloEntityQueryLanguageLoader
     public void LoadFilters() {
         PamelloOutput.Write("Loading filters");
         var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes())
-            .Where(t => t.GetCustomAttributes().Any(a => a is PamelloQueryFilterAttribute));
+            .Where(t => t.GetCustomAttributes().Any(a => a is IPamelloQueryFilterAttribute));
         
         foreach (var type in types) {
-            var attribute = type.GetCustomAttribute<PamelloQueryFilterAttribute>();
+            var attribute = type.GetCustomAttributes().OfType<IPamelloQueryFilterAttribute>().FirstOrDefault();
             if (attribute is null) continue;
 
             PamelloOutput.Write($"| {attribute}");
