@@ -8,7 +8,7 @@ using PamelloV7.Framework.Shared.Entities.Base;
 namespace PamelloV7.Framework.PEQL.Filters;
 
 [PamelloQueryFilter("test")]
-public partial class PamelloQueryTestFilter : PamelloQueryFilter<IPamelloBasicEntity>
+public partial class PamelloQueryTestFilter
 {
     public async IAsyncEnumerable<IPamelloBasicEntity> Execute(int howMuch) {
         await foreach (var entity in GetEntities().Take(howMuch))

@@ -68,13 +68,27 @@ public class AutoInheritanceGenerator : PamelloGenerator<AutoInheritanceDescript
         
         debugOutput.AppendLine($"Found in {targetType.Name}");
 
-        var hasClassFirst = types.FirstOrDefault() is { IsImplicitClass: true };
+        var hasClassFirst = types.FirstOrDefault() is { TypeKind: TypeKind.Class };
+
+        var inheritanceClass = hasClassFirst
+            ? types.First()
+            : null;
+
+        if (inheritanceClass is { IsUnboundGenericType: true } ) {
+            //todo replace first attribute for actual search of a closest compatible type argument
+            
+            var firstAttribute = targetType.GetAttributes().FirstOrDefault(
+                fa => fa.AttributeClass?.GetAttributes().Any(a => a.AttributeClass?.Name == AttributeName) ?? false
+            );
+            
+            inheritanceClass = inheritanceClass.OriginalDefinition.Construct(
+                (firstAttribute?.AttributeClass?.TypeArguments ?? []).ToArray()
+            );
+        }
         
         return new AutoInheritanceDescriptor(
             targetType,
-            hasClassFirst
-                ? types.First()
-                : null,
+            inheritanceClass,
             types.Skip(hasClassFirst ? 1 : 0).ToArray(),
             debugOutput
         );

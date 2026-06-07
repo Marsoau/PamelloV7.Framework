@@ -16,6 +16,8 @@ interface IPamelloQueryFilterAttribute
 
 [AttributeUsage(AttributeTargets.Class)]
 
+[AutoInherit(typeof(PamelloQueryFilter<IPamelloBasicEntity>), [])]
+
 public class PamelloQueryFilterAttribute : Attribute
 {
     public string[] Names { get; set; }
@@ -33,11 +35,14 @@ public class PamelloQueryFilterAttribute : Attribute
 
 [AttributeUsage(AttributeTargets.Class)]
 
-public class PamelloQueryFilterAttribute<TEntityType> : Attribute
+[AutoInherit(typeof(PamelloQueryFilter<>), [])]
+
+public class PamelloQueryFilterAttribute<TPamelloEntity> : Attribute
+    where TPamelloEntity : class, IPamelloBasicEntity
 {
     public string[] Names { get; set; }
     public string? Description { get; }
-    public Type EntitiesType => typeof(TEntityType);
+    public Type EntitiesType => typeof(TPamelloEntity);
     
     public PamelloQueryFilterAttribute(string name, string? description = null) : this([name], description) { }
     public PamelloQueryFilterAttribute(string[] names, string? description = null) {
