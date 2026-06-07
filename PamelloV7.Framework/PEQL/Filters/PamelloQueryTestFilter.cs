@@ -9,8 +9,8 @@ namespace PamelloV7.Framework.PEQL.Filters;
 [PamelloQueryFilter("test")]
 public partial class PamelloQueryTestFilter
 {
-    public async IAsyncEnumerable<IPamelloBasicEntity> Execute() {
-        await foreach (var entity in GetEntities().Take(3))
+    public async IAsyncEnumerable<IPamelloBasicEntity> Execute(int howMuch) {
+        await foreach (var entity in GetEntities().Take(howMuch))
             yield return entity;
     }
 }

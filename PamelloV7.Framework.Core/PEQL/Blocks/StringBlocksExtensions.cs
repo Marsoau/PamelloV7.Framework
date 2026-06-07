@@ -183,4 +183,34 @@ public static class StringBlocksExtensions
 
         return singleBlock;
     }
+
+    public static IEnumerable<PamelloQueryBlock> CompressBlocksToMaxOf(
+        this IEnumerable<PamelloQueryBlock> blocks,
+        int maxItems = int.MaxValue,
+        bool isBackward = false
+    ) {
+        List<PamelloQueryBlock> lastBlocks = [];
+
+        var leftToReturn = maxItems;
+        
+        blocks = isBackward ? blocks.Reverse() : blocks;
+        
+        foreach (var block in blocks) {
+            if (leftToReturn > 1) {
+                yield return block;
+                leftToReturn--;
+                
+                continue;
+            }
+            
+            if (isBackward) {
+                lastBlocks.Insert(0, block);
+            }
+            else {
+                lastBlocks.Add(block);
+            }
+        }
+        
+        if (leftToReturn > 0 && lastBlocks.ToSingleBlock() is { } lastBlock) yield return lastBlock;
+    }
 }

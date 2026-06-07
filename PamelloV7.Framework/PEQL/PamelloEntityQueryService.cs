@@ -156,7 +156,7 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
         
         var result = entityQuery.EnumerateStringBlocks(
             _loader.OperatorsDescriptors.Select(o => o.Attribute.Operator).ToArray()
-        ).ToBlocksPairAround(block => block.Kind == QueryStringBlockKind.Operator);
+        ).ToBlocksPairAround(block => block.Kind == QueryStringBlockKind.Operator, true);
 
         var peqlOperatorDescriptor = result.Target is not null && result.Target.Kind == QueryStringBlockKind.Operator
             ? _loader.OperatorsDescriptors.FirstOrDefault(o => o.Attribute.Operator == result.Target?.Text.FirstOrDefault())
