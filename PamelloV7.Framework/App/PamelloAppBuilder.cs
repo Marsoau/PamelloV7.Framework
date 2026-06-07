@@ -52,8 +52,6 @@ public class PamelloAppBuilder : IHostApplicationBuilder
     public void Configure(Action<PamelloAppOptions>? editOptionsAfterConfig = null) {
         Services.AddSingleton(Options);
         
-        Services.AddTransient<PamelloQueryTestFilter>();
-        
         Services.AddSingleton(ConfigLoader);
         Services.AddSingleton(ServiceLoader);
         Services.AddSingleton(EntityQueryLanguageLoader);

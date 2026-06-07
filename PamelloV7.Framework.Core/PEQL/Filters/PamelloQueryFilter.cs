@@ -8,7 +8,7 @@ using PamelloV7.Framework.Shared.Variants.Attributes;
 
 namespace PamelloV7.Framework.Core.PEQL.Filters;
 
-public abstract partial class PamelloQueryFilter(IServiceProvider services) : PamelloQueryActions
+public abstract partial class PamelloQueryFilter : PamelloQueryActions
 {
     public async IAsyncEnumerable<IPamelloBasicEntity> ExecuteByArgsAsync(PamelloQueryBlock? arg) {
         var executeMethod = GetType().GetMethod("Execute")!;

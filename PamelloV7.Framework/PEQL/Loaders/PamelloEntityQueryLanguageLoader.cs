@@ -114,6 +114,9 @@ public class PamelloEntityQueryLanguageLoader
         foreach (var operatorDescriptor in OperatorsDescriptors) {
             collection.AddTransient(operatorDescriptor.Type);
         }
+        foreach (var filterDescriptor in FiltersDescriptors) {
+            collection.AddTransient(filterDescriptor.Type);
+        }
     }
 
     public void RegisterRepositoryToDrop(Type repositoryType) {
