@@ -7,6 +7,7 @@ using Microsoft.Extensions.Diagnostics.Metrics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PamelloV7.Framework.Config.Loaders;
+using PamelloV7.Framework.Controllers;
 using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Context;
 using PamelloV7.Framework.Core.Logging;
@@ -86,8 +87,14 @@ public class PamelloAppBuilder : IHostApplicationBuilder
     }
 
     private void ConfigureForApi(WebApplicationBuilder webBuilder) {
-        webBuilder.Services.AddControllers()
-            .AddControllersAsServices();
+        var mvcBuilder = webBuilder.Services.AddControllers();
+        
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+            mvcBuilder.AddApplicationPart(assembly);
+        }
+
+        mvcBuilder.AddControllersAsServices();
+        
         webBuilder.Services.AddSignalR();
 
         if (Options.ApiUrls.Count > 0)

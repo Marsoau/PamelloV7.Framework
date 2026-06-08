@@ -50,6 +50,6 @@ class Program
             Console.WriteLine(item);
         }
 
-        await app.StopAsync();
+        await app.WaitForShutdownAsync();
     }
 }
