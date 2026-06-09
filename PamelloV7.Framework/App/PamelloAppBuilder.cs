@@ -12,6 +12,7 @@ using PamelloV7.Framework.Core.Config.Attributes;
 using PamelloV7.Framework.Core.Context;
 using PamelloV7.Framework.Core.Logging;
 using PamelloV7.Framework.Core.Modules.Loaders;
+using PamelloV7.Framework.Filters;
 using PamelloV7.Framework.PEQL.Filters;
 using PamelloV7.Framework.PEQL.Loaders;
 using PamelloV7.Framework.PEQL.Operators;
@@ -87,7 +88,9 @@ public class PamelloAppBuilder : IHostApplicationBuilder
     }
 
     private void ConfigureForApi(WebApplicationBuilder webBuilder) {
-        var mvcBuilder = webBuilder.Services.AddControllers();
+        var mvcBuilder = webBuilder.Services.AddControllers(config =>
+            config.Filters.Add<PamelloExceptionFilter>()
+        );
         
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
             mvcBuilder.AddApplicationPart(assembly);

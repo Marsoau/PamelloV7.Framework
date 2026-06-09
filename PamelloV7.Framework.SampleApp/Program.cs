@@ -31,11 +31,6 @@ public class TestNode
     public ushort Port { get; set; } = 51630;
 }
 
-public class NewPingController : AnotherPingController
-{
-    protected override string Message => "Sample";
-}
-
 class Program
 {
     static async Task Main(string[] args) {
