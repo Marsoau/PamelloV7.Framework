@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PamelloV7.Framework.App;
+using PamelloV7.Framework.Controllers;
 using PamelloV7.Framework.Core.Actions;
 using PamelloV7.Framework.Core.Config;
 using PamelloV7.Framework.Core.Config.Attributes;
@@ -28,6 +29,11 @@ public class TestNode
 {
     public int MyConfigValue { get; set; } = 123;
     public ushort Port { get; set; } = 51630;
+}
+
+public class NewPingController : AnotherPingController
+{
+    protected override string Message => "Sample";
 }
 
 class Program
