@@ -19,6 +19,6 @@ public class PingController : PamelloControllerBase, IPamelloService
     public IActionResult Get() {
         var user = Authorization.GetUser();
         
-        return Ok(Message);
+        return Ok($"{Message} {user}");
     }
 }

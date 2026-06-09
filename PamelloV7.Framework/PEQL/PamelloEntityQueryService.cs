@@ -97,6 +97,8 @@ public partial class PamelloEntityQueryService : IPamelloEntityQueryService
         //songs|$|35
         //145
         //episodes|$|727
+
+        Console.WriteLine($"request from: {PamelloAppScope.User}");
         
         var subQueries = query
             .EnumerateStringBlocks([','])
