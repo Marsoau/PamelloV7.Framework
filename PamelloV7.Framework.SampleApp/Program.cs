@@ -47,7 +47,7 @@ class Program
         
         Console.WriteLine("Items:");
         
-        await foreach (var item in peql.GetAsync<Item>("(1,2,3*3,2,1)#it#unique")) {
+        await foreach (var item in new List<int>([]).ToAsyncEnumerable()) {
             Console.WriteLine(item);
         }
 

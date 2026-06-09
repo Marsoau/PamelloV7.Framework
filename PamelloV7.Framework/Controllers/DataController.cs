@@ -4,13 +4,14 @@ using PamelloV7.Framework.Core.Controllers;
 using PamelloV7.Framework.Core.Exceptions;
 using PamelloV7.Framework.Core.PEQL;
 using PamelloV7.Framework.Core.Scope;
+using PamelloV7.Framework.Core.Services.Base;
 using PamelloV7.Framework.Shared.Exceptions;
 
 namespace PamelloV7.Framework.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class DataController : PamelloControllerBase
+public class DataController : PamelloControllerBase, IPamelloService
 {
     public DataController(IServiceProvider services) : base(services) { }
     
