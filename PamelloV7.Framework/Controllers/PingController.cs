@@ -17,7 +17,7 @@ public class PingController : PamelloControllerBase, IPamelloService
     
     [HttpGet("{*ignored}")]
     public IActionResult Get() {
-        var user = Authorization.GetUser();
+        var user = ControllerAuthorization.GetUser(Request);
         
         return Ok($"{Message} {user}");
     }

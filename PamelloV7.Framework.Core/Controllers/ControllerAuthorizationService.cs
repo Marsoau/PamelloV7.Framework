@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using PamelloV7.Framework.Core.Services.Base;
 using PamelloV7.Framework.Shared.Entities;
 using PamelloV7.Framework.Shared.Exceptions;
@@ -6,7 +7,7 @@ namespace PamelloV7.Framework.Core.Controllers;
 
 public class ControllerAuthorizationService : IPamelloService
 {
-    public virtual IPamelloBasicUser? GetUser() {
+    public virtual IPamelloBasicUser? GetUser(HttpRequest request) {
         throw new PamelloException(
             """
             User authorization is not implemented yet

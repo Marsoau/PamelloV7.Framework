@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using PamelloV7.Framework.Core.Exceptions;
 using PamelloV7.Framework.Shared.Exceptions;
 
 namespace PamelloV7.Framework.Filters
@@ -8,9 +9,15 @@ namespace PamelloV7.Framework.Filters
     {
         public void OnActionExecuting(ActionExecutingContext context) { }
         public void OnActionExecuted(ActionExecutedContext context) {
-            if (context.Exception is PamelloException x) {
-                context.Result = new BadRequestObjectResult(x.Message);
-                context.ExceptionHandled = true;
+            switch (context.Exception) {
+                case PamelloNoScopeUserException:
+                    context.Result = new UnauthorizedResult();
+                    context.ExceptionHandled = true;
+                    break;
+                case PamelloException x:
+                    context.Result = new BadRequestObjectResult(x.Message);
+                    context.ExceptionHandled = true;
+                    break;
             }
         }
     }

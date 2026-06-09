@@ -7,7 +7,7 @@ public abstract class PamelloControllerBase : ControllerBase
 {
     protected readonly IServiceProvider Services;
     
-    protected ControllerAuthorizationService Authorization => field ??= Services.GetRequiredService<ControllerAuthorizationService>();
+    protected ControllerAuthorizationService ControllerAuthorization => field ??= Services.GetRequiredService<ControllerAuthorizationService>();
     
     public PamelloControllerBase(IServiceProvider services) {
         Services = services;
