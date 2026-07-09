@@ -38,7 +38,8 @@ public abstract class PamelloDatabaseRepository<TPamelloEntity, TEntityDao>
         
         return base.LoadPamelloEntity((TPamelloEntity)constructor.Invoke([dao]));
     }
-    protected override TPamelloEntity LoadPamelloEntity(TPamelloEntity entity) {
+    
+    protected override TLoadedPamelloEntity LoadPamelloEntity<TLoadedPamelloEntity>(TLoadedPamelloEntity entity) {
         entity.Save();
         return base.LoadPamelloEntity(entity);
     }

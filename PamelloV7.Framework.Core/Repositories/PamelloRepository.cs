@@ -30,7 +30,9 @@ public abstract class PamelloRepository<TPamelloEntity> : IPamelloRepository<TPa
     public virtual TPamelloEntity? Get(int id)
         => Available.FirstOrDefault(e => e.Id == id);
 
-    protected virtual TPamelloEntity LoadPamelloEntity(TPamelloEntity entity) {
+    protected virtual TLoadedPamelloEntity LoadPamelloEntity<TLoadedPamelloEntity>(TLoadedPamelloEntity entity)
+        where TLoadedPamelloEntity : TPamelloEntity
+    {
         if (Loaded.Any(e => e.Id == entity.Id)) throw new PamelloDatabaseException($"Entity with id {entity.Id} already loaded to {GetType().Name}");
         
         Loaded.Add(entity);
