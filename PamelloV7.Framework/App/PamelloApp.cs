@@ -15,13 +15,16 @@ namespace PamelloV7.Framework.App;
 
 public partial class PamelloApp : IHost
 {
-    private readonly IHost _host;
+    public readonly IHost Host;
     public readonly PamelloAppOptions Options;
     
-    public IServiceProvider Services => _host.Services;
+    public IServiceProvider Services => Host.Services;
+    
+    public Action<IHost>? OnStartup;
+    public Action<WebApplication>? OnApiStartup;
     
     public PamelloApp(IHost host, PamelloAppOptions options) {
-        _host = host;
+        Host = host;
         
         Options = options;
     }
@@ -41,6 +44,8 @@ public partial class PamelloApp : IHost
     }
     
     public Task StartAsync(CancellationToken cancellationToken = default) {
+        OnStartup?.Invoke(Host);
+        
         var repositoriesLoader = Services.GetRequiredService<PamelloEntityQueryLanguageLoader>();
         var servicesLoader = Services.GetRequiredService<PamelloServiceLoader>();
         
@@ -51,14 +56,16 @@ public partial class PamelloApp : IHost
         
         SafeContainerGetters.GetById = (type, id) => entityQueryService.GetSingleById(type, id);
         
-        if (_host is WebApplication asp && Options.UseApi) {
+        if (Host is WebApplication asp && Options.UseApi) {
             StartupForApi(asp);
         }
         
-        return _host.StartAsync(cancellationToken);
+        return Host.StartAsync(cancellationToken);
     }
     
-    private static void StartupForApi(WebApplication asp) {
+    private void StartupForApi(WebApplication asp) {
+        OnApiStartup?.Invoke(asp);
+        
         //asp.MapHub<SignalHub>("/Signal");
 
         asp.Lifetime.ApplicationStarted.Register(() => {
@@ -73,8 +80,8 @@ public partial class PamelloApp : IHost
     }
     
     public Task StopAsync(CancellationToken cancellationToken = default) {
-        return _host.StopAsync(cancellationToken);
+        return Host.StopAsync(cancellationToken);
     }
     
-    public void Dispose() => _host.Dispose();
+    public void Dispose() => Host.Dispose();
 }
